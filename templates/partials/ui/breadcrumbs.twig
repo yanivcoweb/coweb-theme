@@ -15,9 +15,9 @@
 			{% for crumb in trail %}
 				<li class="breadcrumbs__item">
 					{% if crumb.url %}
-						<a class="breadcrumbs__link" href="{{ crumb.url }}">{{ crumb.title }}</a>
+						<a class="breadcrumbs__link" href="{{ crumb.url }}"><bdi>{{ crumb.title }}</bdi></a>
 					{% else %}
-						<span aria-current="page">{{ crumb.title }}</span>
+						<span aria-current="page"><bdi>{{ crumb.title }}</bdi></span>
 					{% endif %}
 				</li>
 			{% endfor %}

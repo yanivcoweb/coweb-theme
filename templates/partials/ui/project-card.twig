@@ -37,11 +37,11 @@
 
 	{% set heading_level = level|default(3) %}
 	<h{{ heading_level }} class="project-card__title">
-		<a class="project-card__link" href="{{ post.link }}">{{ post.title }}</a>
+		<a class="project-card__link" href="{{ post.link }}"><bdi>{{ post.title }}</bdi></a>
 	</h{{ heading_level }}>
 
 	{% if post.excerpt %}
-		<p class="project-card__excerpt">{{ post.excerpt }}</p>
+		<p class="project-card__excerpt"><bdi>{{ post.excerpt }}</bdi></p>
 	{% endif %}
 
 </article>

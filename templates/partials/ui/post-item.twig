@@ -1,6 +1,12 @@
 {#
 	Maps to the Figma `post-item` component.
 
+	Title and excerpt are wrapped in <bdi>. They are arbitrary content and are
+	often pure Latin, and neutral punctuation at the edge of a Latin run takes
+	the paragraph's direction rather than the run's — "Hello world!" renders as
+	"!Hello world" without it. <bdi> is inline, so the start-edge alignment is
+	untouched, and a Hebrew title detects RTL and does not move.
+
 	DOM order is thumbnail → text, which is the opposite of the Figma layer
 	order. In Figma the canvas is LTR so the thumbnail must be placed last to
 	land on the right; in HTML under dir="rtl" the first child is already on the
@@ -30,11 +36,11 @@
 		</p>
 
 		<h2 class="post-item__title">
-			<a class="post-item__link" href="{{ post.link }}">{{ post.title }}</a>
+			<a class="post-item__link" href="{{ post.link }}"><bdi>{{ post.title }}</bdi></a>
 		</h2>
 
 		{% if post.excerpt %}
-			<p class="post-item__excerpt">{{ post.excerpt }}</p>
+			<p class="post-item__excerpt"><bdi>{{ post.excerpt }}</bdi></p>
 		{% endif %}
 	</div>
 

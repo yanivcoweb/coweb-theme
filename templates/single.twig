@@ -22,10 +22,10 @@
 					{% if category %} · {{ category.title }}{% endif %}
 				</p>
 
-				<h1 class="article__title">{{ post.title }}</h1>
+				<h1 class="article__title"><bdi>{{ post.title }}</bdi></h1>
 
 				{% if post.excerpt %}
-					<p class="article__lead">{{ post.excerpt }}</p>
+					<p class="article__lead"><bdi>{{ post.excerpt }}</bdi></p>
 				{% endif %}
 			</header>
 
