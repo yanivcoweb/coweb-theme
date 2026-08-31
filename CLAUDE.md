@@ -363,7 +363,7 @@ object, so `{% if posts %}` is true even when it holds nothing. Test
 `posts|length` — every empty state in the theme was unreachable until this was
 found.
 
-**It has been looked at.** 2026-08-27, in real Chrome, at 390 / 768 / 1024 /
+**It has been looked at.** 2026-08-31, in real Chrome, at 390 / 768 / 1024 /
 1440. This is the thing the previous two sessions could not do — the in-app
 browser pane still cannot composite frames, so the screenshots come from the
 Chrome extension driving a same-origin iframe harness (`vp.html` in the test
