@@ -16,6 +16,18 @@
 				יכול להיות שהכתובת השתנתה, או שהקישור שהגעתם ממנו ישן.
 			</p>
 
+			{# The active recovery path, ahead of the links: someone who hit a
+			   dead URL usually wanted a specific page, not the home page. Its
+			   label is visible because there is no heading here to explain it. #}
+			{% include 'partials/ui/search-form.twig' with {
+				action: home_url,
+				value: '',
+				label: 'חיפוש באתר',
+				hide_label: false,
+				id: 'search-404',
+				variant: 'secondary'
+			} only %}
+
 			<div class="error-page__actions">
 				{% if options.not_found_link.url %}
 					{% include 'partials/ui/button.twig' with {

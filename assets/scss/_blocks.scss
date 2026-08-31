@@ -466,11 +466,18 @@
   flex-direction: column;
   gap: var(--space-sm);
 
-  // The heading already says "search", so the label is for assistive tech
-  // only. It stays in the DOM rather than becoming a placeholder, because a
-  // placeholder disappears the moment someone starts typing.
+  // Visible by default. It is hidden only where a heading already names the
+  // field — on the search results page — and even then it stays in the DOM
+  // rather than becoming a placeholder, because a placeholder disappears the
+  // moment someone starts typing.
   &__label {
-    @include visually-hidden;
+    color: var(--color-text-secondary);
+
+    @include text-mono-label;
+
+    &--hidden {
+      @include visually-hidden;
+    }
   }
 
   &__row {
@@ -488,6 +495,14 @@
       flex-direction: column;
       align-items: stretch;
     }
+  }
+
+  // On the 404 the column is centred, so the form takes a measure of its own
+  // rather than stretching the full container and dwarfing the links below it.
+  .error-page__inner & {
+    inline-size: 100%;
+    max-inline-size: #{rem(420)};
+    text-align: start;
   }
 }
 

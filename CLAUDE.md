@@ -353,7 +353,12 @@ matching partial and block — the naming chain is unbroken end to end. Every
 screen has a template behind it: home, work index and single, about, contact,
 blog index/single/category, a generic content page, and 404.
 
-Search results are `search.php` + `templates/search.twig`. Without that pair
+Search results are `search.php` + `templates/search.twig`, and the field
+itself is `partials/ui/search-form.twig` — it appears on the results page and
+on the 404, which is the only entry point to search the site has. The partial
+takes `hide_label` (the results page has an `<h1>` that names the field; the
+404 does not) and `variant` (primary where submitting is the page's main
+action, secondary on the 404 where "back to home" already owns primary). Without that pair
 WordPress falls back to `index.php`, which renders the blog archive under the
 heading "בלוג" — no term, no count, and no way to tell an empty result from an
 empty blog.

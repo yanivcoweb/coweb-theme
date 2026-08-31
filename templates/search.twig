@@ -44,20 +44,14 @@
 				{% endif %}
 			</header>
 
-			<form class="search-form" role="search" method="get" action="{{ home_url }}">
-				<label class="search-form__label" for="search-field">חיפוש באתר</label>
-				<div class="search-form__row">
-					<input
-						class="form-field__control search-form__control"
-						id="search-field"
-						type="search"
-						name="s"
-						value="{{ search_query }}"
-						placeholder="מה אתם מחפשים?"
-					>
-					<button class="button button--primary" type="submit">חיפוש</button>
-				</div>
-			</form>
+			{# The <h1> above already names the field, so its label is for
+			   assistive tech only here. #}
+			{% include 'partials/ui/search-form.twig' with {
+				action: home_url,
+				value: search_query,
+				label: 'חיפוש באתר',
+				hide_label: true
+			} only %}
 
 			{# `posts` is a Timber PostQuery, which extends ArrayObject: Countable,
 			   but an object, so plain `{% if posts %}` is true even when it holds

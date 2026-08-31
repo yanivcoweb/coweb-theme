@@ -1,0 +1,41 @@
+{#
+	Site search field.
+
+	Used in two places that need it for different reasons: the search results
+	page, where the heading already says what the field is for, and the 404,
+	where it is the only recovery path a visitor has that isn't "go home".
+
+	`hide_label` covers exactly that difference. The label is always a real
+	<label for> either way — never a placeholder standing in for one, because a
+	placeholder disappears the moment someone starts typing, and on the 404
+	there is no heading left to explain the field.
+
+	`variant` keeps the button hierarchy honest: primary on the search page,
+	where submitting is the page's main action, and secondary on the 404, where
+	"back to home" already owns primary and the input is prominent on its own.
+
+	Expects: action, value, label, hide_label, id, variant.
+#}
+
+{% set field_id = id|default('search-field') %}
+
+<form class="search-form" role="search" method="get" action="{{ action }}">
+
+	<label
+		class="search-form__label{{ hide_label ? ' search-form__label--hidden' : '' }}"
+		for="{{ field_id }}"
+	>{{ label|default('חיפוש באתר') }}</label>
+
+	<div class="search-form__row">
+		<input
+			class="form-field__control search-form__control"
+			id="{{ field_id }}"
+			type="search"
+			name="s"
+			value="{{ value }}"
+			placeholder="מה אתם מחפשים?"
+		>
+		<button class="button button--{{ variant|default('primary') }}" type="submit">חיפוש</button>
+	</div>
+
+</form>
