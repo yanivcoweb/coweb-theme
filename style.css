@@ -1,0 +1,23 @@
+/*
+Theme Name: CoWeb
+Theme URI: https://coweb.co.il
+Author: Yaniv Levy
+Author URI: https://coweb.co.il
+Description: Custom WordPress theme for coweb.co.il. Hebrew-only, RTL, dark UI. Timber/Twig templating with ACF Flexible Content sections.
+Version: 0.1.0
+Requires at least: 6.4
+Tested up to: 6.7
+Requires PHP: 8.1
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: coweb
+*/
+
+/*
+ * Nothing is styled from this file.
+ *
+ * WordPress requires style.css to exist so it can identify the theme, but the
+ * real stylesheet is compiled from assets/scss/ to assets/css/main.css and
+ * enqueued in inc/assets.php. Adding rules here would create a second source
+ * of truth that bypasses the token system — don't.
+ */

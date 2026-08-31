@@ -1,0 +1,43 @@
+{#
+	ACF layout: work_selected — Figma `work-selected`.
+
+	Sits on a raised ground so it separates from the sections either side
+	without needing a rule.
+#}
+
+<section class="work-selected">
+	<div class="container work-selected__inner">
+
+		{% include 'partials/ui/section-header.twig' with {
+			eyebrow: section.eyebrow,
+			heading: section.heading,
+			intro: section.intro
+		} only %}
+
+		{#
+			The ACF relationship field returns WP_Post objects, not Timber
+			posts. `project-card` reads .title, .link, .thumbnail and
+			.terms(), none of which exist on a WP_Post — so passing the raw
+			value renders the card shell with an empty title and an empty
+			href, with no error anywhere. `get_post()` is Timber's own Twig
+			function and takes a WP_Post straight through PostFactory.
+		#}
+		{% if section.projects %}
+			<ul class="work-selected__list">
+				{% for project in section.projects %}
+					<li>
+						{% include 'partials/ui/project-card.twig' with { post: get_post(project) } only %}
+					</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+
+		{% if section.link.url %}
+			{% include 'partials/ui/button.twig' with {
+				link: section.link,
+				variant: 'ghost'
+			} only %}
+		{% endif %}
+
+	</div>
+</section>

@@ -1,0 +1,23 @@
+# Compiled output — rebuilt on deploy, never committed.
+/assets/css/
+
+# Dependencies
+/node_modules/
+/vendor/
+
+# ACF must stay registered in PHP. A JSON export here means someone created a
+# field in the admin UI, which is the one thing inc/acf-sections.php exists to
+# prevent.
+/acf-json/
+
+# Local tooling
+# settings.local.json is per-machine tool permissions, not project config —
+# that is what the `.local.` infix means. The shared .claude/settings.json,
+# if one is ever added, is committed.
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
+*.log
+.env
+.idea/
+.vscode/

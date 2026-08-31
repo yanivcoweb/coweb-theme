@@ -1,0 +1,115 @@
+{#
+	ACF layout: contact_block — Figma `contact` screen.
+
+	Form on the start edge (right), details on the end. Under dir="rtl" the DOM
+	order is the reading order and flex mirrors itself.
+
+	The status message is role="status" so it is announced after the redirect —
+	without it a screen reader user gets a silently reloaded page.
+#}
+
+{% set state = contact_state() %}
+
+<section class="contact-block">
+	<div class="container contact-block__inner">
+
+		<div class="contact-block__form">
+
+			{% if state.status == 'sent' %}
+				<p class="form-notice form-notice--success" role="status">
+					תודה — ההודעה נשלחה. אחזור אליכם תוך יום עסקים.
+				</p>
+			{% elseif state.status == 'error' %}
+				<p class="form-notice form-notice--error" role="status">
+					משהו חסר בטופס. הפרטים שמולאו נשמרו — נא להשלים את המסומן.
+				</p>
+			{% elseif state.status == 'failed' %}
+				<p class="form-notice form-notice--error" role="status">
+					השליחה נכשלה מסיבה טכנית. אפשר לכתוב לי ישירות במקום.
+				</p>
+			{% elseif state.status == 'expired' %}
+				<p class="form-notice form-notice--error" role="status">
+					הטופס פג תוקף. נא לרענן את העמוד ולנסות שוב.
+				</p>
+			{% endif %}
+
+			<form
+				class="contact-form"
+				id="contact-form"
+				action="{{ admin_post_url() }}"
+				method="post"
+				novalidate
+			>
+				<input type="hidden" name="action" value="coweb_contact">
+				<input type="hidden" name="coweb_contact_nonce" value="{{ contact_nonce() }}">
+
+				{# Carries the return path in the POST body so it survives a
+				   browser that withholds the Referer header. #}
+				<input type="hidden" name="_wp_http_referer" value="{{ contact_referer() }}">
+
+				{# Honeypot. Hidden from sight and from assistive tech alike, and
+				   never focusable — a real visitor cannot reach it. #}
+				<div class="contact-form__trap" aria-hidden="true">
+					<label for="coweb-website">אל תמלאו שדה זה</label>
+					<input type="text" id="coweb-website" name="coweb_website" tabindex="-1" autocomplete="off">
+				</div>
+
+				{% include 'partials/ui/form-field.twig' with {
+					name: 'name', label: 'שם מלא', type: 'text', required: true,
+					placeholder: 'ישראל ישראלי', autocomplete: 'name',
+					value: state.values.name, error: state.errors.name
+				} only %}
+
+				{% include 'partials/ui/form-field.twig' with {
+					name: 'email', label: 'אימייל', type: 'email', required: true,
+					placeholder: 'you@company.com', autocomplete: 'email',
+					value: state.values.email, error: state.errors.email
+				} only %}
+
+				{% include 'partials/ui/form-field.twig' with {
+					name: 'company', label: 'חברה', type: 'text',
+					placeholder: 'שם החברה', autocomplete: 'organization',
+					value: state.values.company, error: state.errors.company
+				} only %}
+
+				{% include 'partials/ui/form-field.twig' with {
+					name: 'message', label: 'במה אפשר לעזור?', type: 'textarea', required: true,
+					placeholder: 'ספרו בקצרה על הפרויקט, לוחות הזמנים והתקציב.',
+					value: state.values.message, error: state.errors.message
+				} only %}
+
+				<button class="button button--primary" type="submit">שליחה</button>
+			</form>
+
+		</div>
+
+		{% if section.details %}
+			<div class="contact-block__details">
+				{% for detail in section.details %}
+					<div class="contact-detail">
+						<p class="contact-detail__label">{{ detail.label }}</p>
+						{#
+							<bdi> isolates the value's character order without
+							touching the block's alignment, so an email or a
+							phone number still reads left-to-right while staying
+							level with its label on the start edge. Putting
+							`direction: ltr` on the <p> instead resolves
+							`text-align: start` to the left and strands the value
+							at the far edge of the column.
+						#}
+						<p class="contact-detail__value">
+							<bdi dir="{{ detail.ltr ? 'ltr' : 'auto' }}">
+								{%- if detail.url -%}
+									<a href="{{ detail.url }}">{{ detail.value }}</a>
+								{%- else -%}
+									{{ detail.value }}
+								{%- endif -%}
+							</bdi>
+						</p>
+					</div>
+				{% endfor %}
+			</div>
+		{% endif %}
+
+	</div>
+</section>

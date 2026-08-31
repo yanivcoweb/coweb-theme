@@ -1,0 +1,29 @@
+{#
+	ACF layout: process_steps — Figma `process-steps` + `process-step`.
+
+	Step numbers are generated, exactly like the capability card index.
+#}
+
+<section class="process-steps">
+	<div class="container process-steps__inner">
+
+		{% include 'partials/ui/section-header.twig' with {
+			eyebrow: section.eyebrow,
+			heading: section.heading,
+			intro: section.intro
+		} only %}
+
+		{% if section.steps %}
+			<ol class="process-steps__list">
+				{% for step in section.steps %}
+					<li class="process-step">
+						<p class="process-step__number">{{ '%02d'|format(loop.index) }}</p>
+						<h3 class="process-step__title">{{ step.title }}</h3>
+						<p class="process-step__body">{{ step.body }}</p>
+					</li>
+				{% endfor %}
+			</ol>
+		{% endif %}
+
+	</div>
+</section>

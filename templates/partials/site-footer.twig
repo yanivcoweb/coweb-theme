@@ -1,0 +1,28 @@
+{#
+	Global footer.
+
+	Email and phone are wrapped in a class that forces LTR — a Hebrew container
+	would otherwise reorder the digits of a phone number.
+#}
+
+<footer class="site-footer">
+	<div class="container site-footer__inner">
+
+		<p class="site-footer__copyright">© CoWeb {{ "now"|date("Y") }}</p>
+
+		<div class="site-footer__contact">
+			{% if linkedin %}
+				<a class="site-footer__link" href="{{ linkedin }}" target="_blank" rel="noopener">LinkedIn</a>
+			{% endif %}
+
+			{% if email %}
+				<a class="site-footer__link site-footer__link--ltr" href="mailto:{{ email }}">{{ email }}</a>
+			{% endif %}
+
+			{% if phone %}
+				<a class="site-footer__link site-footer__link--ltr" href="tel:{{ phone|replace({'-': '', ' ': ''}) }}">{{ phone }}</a>
+			{% endif %}
+		</div>
+
+	</div>
+</footer>

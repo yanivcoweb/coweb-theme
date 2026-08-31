@@ -1,0 +1,41 @@
+{#
+	Maps to the Figma `post-item` component.
+
+	DOM order is thumbnail → text, which is the opposite of the Figma layer
+	order. In Figma the canvas is LTR so the thumbnail must be placed last to
+	land on the right; in HTML under dir="rtl" the first child is already on the
+	right. Don't "fix" one to match the other — they're both correct.
+#}
+
+<article class="post-item">
+
+	<div class="post-item__thumbnail">
+		{% if post.thumbnail %}
+			<img
+				src="{{ post.thumbnail.src('medium') }}"
+				alt="{{ post.thumbnail.alt|default(post.title) }}"
+				width="{{ post.thumbnail.width }}"
+				height="{{ post.thumbnail.height }}"
+				loading="lazy"
+				decoding="async"
+			>
+		{% endif %}
+	</div>
+
+	<div class="post-item__text">
+		<p class="post-item__meta">
+			<time datetime="{{ post.date('c') }}">{{ post.date('d.m.Y') }}</time>
+			{% set category = post.terms('category')|first %}
+			{% if category %} · {{ category.title }}{% endif %}
+		</p>
+
+		<h2 class="post-item__title">
+			<a class="post-item__link" href="{{ post.link }}">{{ post.title }}</a>
+		</h2>
+
+		{% if post.excerpt %}
+			<p class="post-item__excerpt">{{ post.excerpt }}</p>
+		{% endif %}
+	</div>
+
+</article>

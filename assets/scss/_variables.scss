@@ -1,0 +1,161 @@
+@use "functions" as *;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Design tokens — generated from the Figma file `CoWeb — Redesign 2026`.
+//
+// Two forms of every token. Prefer the CSS custom property in rules; reach for
+// the SCSS variable only inside a media query or calc() where Sass needs a
+// compile-time value.
+//
+// If a value isn't here, it doesn't go in the CSS. Add the token first.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Surface ──────────────────────────────────────────────────────────────────
+$color-surface-base: #0b0c0e;
+$color-surface-raised: #14161a;
+$color-surface-overlay: #1c1f25;
+$color-surface-inverse: #f5f6f8;
+
+// ── Text ─────────────────────────────────────────────────────────────────────
+$color-text-primary: #f4f5f7;
+$color-text-secondary: #a2aab6;
+$color-text-muted: #6d7684;
+$color-text-inverse: #0b0c0e;
+$color-text-accent: #ff7a45;
+
+// ── Border ───────────────────────────────────────────────────────────────────
+$color-border-subtle: #23272e;
+$color-border-strong: #363c46;
+$color-border-accent: #ff7a45;
+
+// ── Brand & accent ───────────────────────────────────────────────────────────
+$color-brand-ember: #ff7a45;
+$color-brand-ember-hover: #ff9166;
+$color-brand-ember-dim: #4a2416;
+$color-accent-mint: #6ee7b7;
+
+// ── Feedback ─────────────────────────────────────────────────────────────────
+$color-feedback-error: #ff4d5e;
+
+// ── Spacing ──────────────────────────────────────────────────────────────────
+$space-2xs: rem(4);
+$space-xs: rem(8);
+$space-sm: rem(12);
+$space-md: rem(16);
+$space-lg: rem(24);
+$space-xl: rem(32);
+$space-2xl: rem(48);
+$space-3xl: rem(64);
+$space-4xl: rem(96);
+$space-5xl: rem(128);
+
+// ── Radius ───────────────────────────────────────────────────────────────────
+$radius-sm: rem(6);
+$radius-md: rem(10);
+$radius-lg: rem(16);
+$radius-full: 999px;
+
+// ── Sizing ───────────────────────────────────────────────────────────────────
+$size-container: rem(1200);
+$size-measure: rem(760); // article measure, ~65 Hebrew characters
+$size-gutter: clamp(#{rem(20)}, 2vw, #{rem(24)});
+
+// ── Type: family ─────────────────────────────────────────────────────────────
+$font-sans: "IBM Plex Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
+$font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Courier New", monospace;
+
+// ── Type: size (390px → 1440px) ──────────────────────────────────────────────
+$text-size-display: fluid(38, 64);
+$text-size-h1: fluid(30, 48);
+$text-size-h2: fluid(25, 36);
+$text-size-h3: fluid(20, 26);
+$text-size-body-lg: fluid(17, 20);
+$text-size-body: fluid(16, 17);
+$text-size-small: fluid(14, 15);
+$text-size-mono: fluid(12, 13);
+
+// UI/Nav and Mono/Code do not scale — they are deliberately unbound in Figma.
+$text-size-nav: rem(16);
+$text-size-code: rem(14);
+
+// ── Motion ───────────────────────────────────────────────────────────────────
+$motion-instant: 0ms;
+$motion-fast: 120ms;
+$motion-base: 200ms;
+$motion-slow: 320ms;
+
+$ease-standard: cubic-bezier(0.2, 0, 0, 1);
+$ease-entrance: cubic-bezier(0, 0, 0, 1);
+$ease-exit: cubic-bezier(0.3, 0, 1, 1);
+
+// ── Breakpoints ──────────────────────────────────────────────────────────────
+// Only used inside media queries, which is exactly why they stay SCSS-only.
+$bp-tablet: 48rem; // 768px
+$bp-desktop: 64rem; // 1024px
+
+:root {
+  --color-surface-base: #{$color-surface-base};
+  --color-surface-raised: #{$color-surface-raised};
+  --color-surface-overlay: #{$color-surface-overlay};
+  --color-surface-inverse: #{$color-surface-inverse};
+
+  --color-text-primary: #{$color-text-primary};
+  --color-text-secondary: #{$color-text-secondary};
+  --color-text-muted: #{$color-text-muted};
+  --color-text-inverse: #{$color-text-inverse};
+  --color-text-accent: #{$color-text-accent};
+
+  --color-border-subtle: #{$color-border-subtle};
+  --color-border-strong: #{$color-border-strong};
+  --color-border-accent: #{$color-border-accent};
+
+  --color-brand-ember: #{$color-brand-ember};
+  --color-brand-ember-hover: #{$color-brand-ember-hover};
+  --color-brand-ember-dim: #{$color-brand-ember-dim};
+  --color-accent-mint: #{$color-accent-mint};
+
+  --color-feedback-error: #{$color-feedback-error};
+
+  --space-2xs: #{$space-2xs};
+  --space-xs: #{$space-xs};
+  --space-sm: #{$space-sm};
+  --space-md: #{$space-md};
+  --space-lg: #{$space-lg};
+  --space-xl: #{$space-xl};
+  --space-2xl: #{$space-2xl};
+  --space-3xl: #{$space-3xl};
+  --space-4xl: #{$space-4xl};
+  --space-5xl: #{$space-5xl};
+
+  --radius-sm: #{$radius-sm};
+  --radius-md: #{$radius-md};
+  --radius-lg: #{$radius-lg};
+  --radius-full: #{$radius-full};
+
+  --size-container: #{$size-container};
+  --size-measure: #{$size-measure};
+  --size-gutter: #{$size-gutter};
+
+  --font-sans: #{$font-sans};
+  --font-mono: #{$font-mono};
+
+  --text-size-display: #{$text-size-display};
+  --text-size-h1: #{$text-size-h1};
+  --text-size-h2: #{$text-size-h2};
+  --text-size-h3: #{$text-size-h3};
+  --text-size-body-lg: #{$text-size-body-lg};
+  --text-size-body: #{$text-size-body};
+  --text-size-small: #{$text-size-small};
+  --text-size-mono: #{$text-size-mono};
+  --text-size-nav: #{$text-size-nav};
+  --text-size-code: #{$text-size-code};
+
+  --motion-instant: #{$motion-instant};
+  --motion-fast: #{$motion-fast};
+  --motion-base: #{$motion-base};
+  --motion-slow: #{$motion-slow};
+
+  --ease-standard: #{$ease-standard};
+  --ease-entrance: #{$ease-entrance};
+  --ease-exit: #{$ease-exit};
+}

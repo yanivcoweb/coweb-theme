@@ -1,0 +1,47 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Containers
+//
+// Names match the existing CoWeb convention so the ACF clone field keeps
+// working. Every one is logical-property only — no left, no right.
+// ─────────────────────────────────────────────────────────────────────────────
+
+%container-base {
+  inline-size: 100%;
+  margin-inline: auto;
+  padding-inline: var(--size-gutter);
+}
+
+.container-narrow {
+  @extend %container-base;
+
+  max-inline-size: var(--size-measure); // 760px — article measure
+}
+
+.container-medium {
+  @extend %container-base;
+
+  max-inline-size: 60rem; // 960px
+}
+
+.container {
+  @extend %container-base;
+
+  max-inline-size: var(--size-container); // 1200px
+}
+
+.container-full-width {
+  inline-size: 100%;
+  padding-inline: var(--size-gutter);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Section rhythm
+//
+// Every section owns its own vertical padding via the `section-spacing` mixin.
+// There is deliberately no sibling rule here: the moment spacing depends on
+// what a section happens to sit next to, reordering rows in ACF starts moving
+// things the editor didn't touch.
+// ─────────────────────────────────────────────────────────────────────────────

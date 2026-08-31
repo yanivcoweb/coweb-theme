@@ -1,0 +1,15 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CoWeb — single compiled stylesheet.
+//
+//   npm run dev     watch and rebuild
+//   npm run build   minified, for deploy
+//
+// Order matters: tokens, then the primitives that consume them, then the
+// blocks. Nothing below _base should introduce a raw colour or size.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@use "variables";
+@use "base";
+@use "layout";
+@use "ui";
+@use "blocks";

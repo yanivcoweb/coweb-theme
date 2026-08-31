@@ -1,0 +1,26 @@
+{#
+	Breadcrumb trail. The list comes from coweb_breadcrumbs() in PHP, never
+	from a field.
+
+	The current page is the last item and carries no link — linking to the page
+	you're already on is noise for everyone and a dead end for screen readers.
+	aria-current marks it instead.
+#}
+
+{% set trail = breadcrumbs() %}
+
+{% if trail|length > 1 %}
+	<nav class="breadcrumbs" aria-label="פירורי לחם">
+		<ol class="breadcrumbs__list">
+			{% for crumb in trail %}
+				<li class="breadcrumbs__item">
+					{% if crumb.url %}
+						<a class="breadcrumbs__link" href="{{ crumb.url }}">{{ crumb.title }}</a>
+					{% else %}
+						<span aria-current="page">{{ crumb.title }}</span>
+					{% endif %}
+				</li>
+			{% endfor %}
+		</ol>
+	</nav>
+{% endif %}

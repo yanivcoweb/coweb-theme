@@ -1,0 +1,35 @@
+{#
+	ACF layout: hero_main — Figma `hero-main`.
+
+	Carries the page's h1. Every other section uses h2, so this partial belongs
+	at the top of a page and nowhere else.
+#}
+
+<section class="hero-main">
+	<div class="container hero-main__inner">
+
+		{% if section.eyebrow %}
+			<p class="hero-main__eyebrow">{{ section.eyebrow }}</p>
+		{% endif %}
+
+		{% if section.heading %}
+			<h1 class="hero-main__heading">{{ section.heading }}</h1>
+		{% endif %}
+
+		{% if section.intro %}
+			<p class="hero-main__intro">{{ section.intro }}</p>
+		{% endif %}
+
+		{% if section.actions %}
+			<div class="hero-main__actions">
+				{% for action in section.actions %}
+					{% include 'partials/ui/button.twig' with {
+						link: action.link,
+						variant: action.variant
+					} only %}
+				{% endfor %}
+			</div>
+		{% endif %}
+
+	</div>
+</section>

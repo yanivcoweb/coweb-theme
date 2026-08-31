@@ -1,0 +1,19 @@
+{#
+	ACF layout: stat_row — Figma `stat-block` in a row.
+
+	Used on work-single and about. Every figure here is a claim about real
+	work — if a number can't be measured, delete the row rather than round it.
+#}
+
+{% if section.stats %}
+	<section class="stat-row">
+		<div class="container stat-row__inner">
+			{% for stat in section.stats %}
+				{% include 'partials/ui/stat-block.twig' with {
+					value: stat.value,
+					label: stat.label
+				} only %}
+			{% endfor %}
+		</div>
+	</section>
+{% endif %}

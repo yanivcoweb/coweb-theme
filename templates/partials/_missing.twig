@@ -1,0 +1,17 @@
+{#
+	A section registered in ACF with no Twig partial behind it.
+
+	Visitors see nothing. Editors and admins see exactly what is missing and
+	where to put it — a silent blank gap is how these go unnoticed for weeks.
+#}
+
+{% if current_user_can('edit_posts') %}
+	<div class="missing-section" role="note">
+		<p class="missing-section__title">חסרה תבנית לסקשן</p>
+		<p class="missing-section__body">
+			הסקשן <code>{{ layout }}</code> רשום ב־ACF אבל אין לו קובץ Twig.
+			צרו את <code>templates/partials/sections/{{ layout|replace({'_': '-'}) }}.twig</code>,
+			והוסיפו בלוק תואם ב־<code>assets/scss/_blocks.scss</code>.
+		</p>
+	</div>
+{% endif %}

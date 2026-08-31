@@ -1,0 +1,133 @@
+@use "variables" as *;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Type mixins — one per Figma text style.
+//
+// Line heights and tracking are unitless ratios taken straight from the text
+// styles. The negative tracking on the big headings suits Latin; if a Hebrew
+// headline ever looks crowded, raise the tracking here rather than shrinking
+// the font.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@mixin text-display {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: var(--text-size-display);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+@mixin text-h1 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--text-size-h1);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+@mixin text-h2 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--text-size-h2);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+}
+
+@mixin text-h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--text-size-h3);
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+
+@mixin text-body-lg {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--text-size-body-lg);
+  line-height: 1.65;
+}
+
+@mixin text-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--text-size-body);
+  line-height: 1.7;
+}
+
+@mixin text-small {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--text-size-small);
+  line-height: 1.55;
+}
+
+@mixin text-button {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--text-size-body);
+  line-height: 1;
+}
+
+@mixin text-nav {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: var(--text-size-nav);
+  line-height: 1;
+}
+
+@mixin text-mono-label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--text-size-mono);
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+@mixin text-code {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: var(--text-size-code);
+  line-height: 1.65;
+
+  // Code, phone numbers and email addresses stay LTR inside RTL prose.
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: start;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Layout helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Vertical rhythm for a full-bleed page section.
+@mixin section-spacing {
+  padding-block: clamp(#{$space-2xl}, 8vw, #{$space-4xl});
+}
+
+/// Hide visually, keep for screen readers.
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/// Only render on viewports at or above a breakpoint.
+@mixin from($width) {
+  @media (min-width: $width) {
+    @content;
+  }
+}
+
+/// Only render below a breakpoint.
+@mixin below($width) {
+  @media (max-width: #{$width - 0.0625rem}) {
+    @content;
+  }
+}

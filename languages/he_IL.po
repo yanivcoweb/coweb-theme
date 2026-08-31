@@ -1,0 +1,50 @@
+# Hebrew translation for the CoWeb theme.
+# The site ships in Hebrew only, but the strings stay English in source so
+# an English version later costs nothing -- see CLAUDE.md, RTL section.
+msgid ""
+msgstr ""
+"Project-Id-Version: CoWeb
+"
+"Language: he_IL
+"
+"MIME-Version: 1.0
+"
+"Content-Type: text/plain; charset=UTF-8
+"
+"Content-Transfer-Encoding: 8bit
+"
+"Plural-Forms: nplurals=2; plural=(n != 1);
+"
+
+msgid "Work"
+msgstr "עבודות"
+
+msgid "Project"
+msgstr "פרויקט"
+
+msgid "Add project"
+msgstr "הוספת פרויקט"
+
+msgid "Edit project"
+msgstr "עריכת פרויקט"
+
+msgid "Search projects"
+msgstr "חיפוש פרויקטים"
+
+msgid "No projects yet"
+msgstr "אין פרויקטים עדיין"
+
+msgid "Project tags"
+msgstr "תגיות פרויקט"
+
+msgid "Project tag"
+msgstr "תגית פרויקט"
+
+msgid "Primary navigation"
+msgstr "ניווט ראשי"
+
+msgid "Site settings"
+msgstr "הגדרות אתר"
+
+msgid "The CoWeb theme requires Timber 2.x. Activate the Timber plugin, or run composer install in the theme directory."
+msgstr "תמת CoWeb דורשת את Timber 2.x. יש להפעיל את תוסף Timber, או להריץ composer install בתיקיית התמה."

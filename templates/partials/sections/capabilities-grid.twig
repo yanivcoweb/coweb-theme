@@ -1,0 +1,30 @@
+{#
+	ACF layout: capabilities_grid — Figma `capabilities-grid` + `capability-card`.
+
+	The card index is generated from the loop, never authored. An authored
+	number drifts the moment someone reorders rows in ACF.
+#}
+
+<section class="capabilities-grid">
+	<div class="container capabilities-grid__inner">
+
+		{% include 'partials/ui/section-header.twig' with {
+			eyebrow: section.eyebrow,
+			heading: section.heading,
+			intro: section.intro
+		} only %}
+
+		{% if section.cards %}
+			<ul class="capabilities-grid__list">
+				{% for card in section.cards %}
+					<li class="capability-card">
+						<p class="capability-card__index">{{ '%02d'|format(loop.index) }}</p>
+						<h3 class="capability-card__title">{{ card.title }}</h3>
+						<p class="capability-card__body">{{ card.body }}</p>
+					</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+
+	</div>
+</section>

@@ -1,0 +1,38 @@
+{#
+	ACF layout: logo_strip — Figma `logo-strip`.
+
+	The `logo` image field is optional on purpose: until real vector logos
+	exist, the wordmark falls back to the client name as text. Once an SVG is
+	uploaded the same row renders it with no template change.
+#}
+
+{% if section.clients %}
+	<section class="logo-strip">
+		<div class="container logo-strip__inner">
+
+			{% if section.label %}
+				<p class="logo-strip__label">{{ section.label }}</p>
+			{% endif %}
+
+			<ul class="logo-strip__list">
+				{% for client in section.clients %}
+					<li class="logo-strip__item">
+						{% if client.logo %}
+							<img
+								src="{{ client.logo.src }}"
+								alt="{{ client.logo.alt|default(client.name) }}"
+								width="{{ client.logo.width }}"
+								height="{{ client.logo.height }}"
+								loading="lazy"
+								decoding="async"
+							>
+						{% else %}
+							{{ client.name }}
+						{% endif %}
+					</li>
+				{% endfor %}
+			</ul>
+
+		</div>
+	</section>
+{% endif %}

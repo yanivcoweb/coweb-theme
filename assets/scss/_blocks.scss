@@ -1,0 +1,805 @@
+@use "functions" as *;
+@use "variables" as *;
+@use "mixins" as *;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// site-header
+//
+// RTL note: no row-reverse anywhere. Under dir="rtl" flex already lays the
+// first child at the start edge, which is the right. The DOM order is simply
+// logo → nav → CTA and the browser does the mirroring.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.site-header {
+  position: relative;
+  z-index: 60;
+  border-block-end: 1px solid var(--color-border-subtle);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding-block: var(--space-md);
+  }
+
+  &__logo {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: #{rem(26)};
+    line-height: 1;
+    text-decoration: none;
+    color: var(--color-text-primary);
+
+    // The wordmark is two-tone until it becomes a real vector.
+    span:first-child {
+      color: var(--color-brand-ember);
+    }
+  }
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: #{rem(44)};
+    block-size: #{rem(44)};
+    color: var(--color-text-primary);
+    border-radius: var(--radius-sm);
+
+    @include from($bp-tablet) {
+      display: none;
+    }
+  }
+
+  &__cta {
+    @include below($bp-tablet) {
+      display: none;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// site-nav — inline on desktop, a drawer on mobile
+// ─────────────────────────────────────────────────────────────────────────────
+
+.site-nav {
+  &__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+  }
+
+  &__link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+
+    @include text-nav;
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+
+    &[aria-current="page"] {
+      color: var(--color-text-primary);
+    }
+  }
+
+  @include below($bp-tablet) {
+    // transform has no logical form, so the sign is flipped by hand.
+    // RTL parks the drawer off the right edge; LTR flips it below.
+    --slide: 1;
+
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-lg);
+    background-color: var(--color-surface-base);
+    transform: translateX(calc(100% * var(--slide)));
+    visibility: hidden;
+    transition:
+      transform var(--motion-base) var(--ease-entrance),
+      visibility 0s linear var(--motion-base);
+
+    &[data-open] {
+      transform: translateX(0);
+      visibility: visible;
+      transition:
+        transform var(--motion-base) var(--ease-entrance),
+        visibility 0s;
+    }
+
+    &__list {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      margin-block-start: var(--space-3xl);
+    }
+
+    &__item {
+      border-block-end: 1px solid var(--color-border-subtle);
+    }
+
+    &__link {
+      display: block;
+      padding-block: var(--space-lg);
+      color: var(--color-text-primary);
+
+      @include text-h3;
+    }
+  }
+}
+
+[dir="ltr"] .site-nav {
+  --slide: -1;
+}
+
+.site-nav__close {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: #{rem(44)};
+  block-size: #{rem(44)};
+  color: var(--color-text-primary);
+  border-radius: var(--radius-sm);
+
+  @include from($bp-tablet) {
+    display: none;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// site-footer
+// ─────────────────────────────────────────────────────────────────────────────
+
+.site-footer {
+  border-block-start: 1px solid var(--color-border-subtle);
+
+  &__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl);
+  }
+
+  &__contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xl);
+  }
+
+  &__link,
+  &__copyright {
+    color: var(--color-text-muted);
+    text-decoration: none;
+
+    @include text-mono-label;
+  }
+
+  &__link:hover {
+    color: var(--color-text-primary);
+  }
+
+  // Email and phone stay LTR inside the RTL footer.
+  &__link--ltr {
+    @include text-code;
+
+    font-size: var(--text-size-mono);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// hero-main
+// ─────────────────────────────────────────────────────────────────────────────
+
+.hero-main {
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  &__eyebrow {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
+  &__heading {
+    max-inline-size: 18ch;
+
+    @include text-display;
+  }
+
+  &__intro {
+    max-inline-size: 46ch;
+    color: var(--color-text-secondary);
+
+    @include text-body-lg;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-block-start: var(--space-md);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// logo-strip
+// ─────────────────────────────────────────────────────────────────────────────
+
+.logo-strip {
+  padding-block: var(--space-2xl);
+  border-block: 1px solid var(--color-border-subtle);
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  &__label {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-lg) var(--space-xl);
+  }
+
+  &__item {
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: #{rem(20)};
+    letter-spacing: -0.01em;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// capabilities-grid
+// ─────────────────────────────────────────────────────────────────────────────
+
+.capabilities-grid {
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  &__list {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(#{rem(280)}, 1fr));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// process-steps
+// ─────────────────────────────────────────────────────────────────────────────
+
+.process-steps {
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  &__list {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(#{rem(220)}, 1fr));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// cta-band
+// ─────────────────────────────────────────────────────────────────────────────
+
+.cta-band {
+  padding-block: clamp(#{$space-2xl}, 6vw, #{$space-3xl});
+  background-color: var(--color-brand-ember-dim);
+
+  &__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xl);
+  }
+
+  &__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    max-inline-size: 40ch;
+  }
+
+  &__heading {
+    @include text-h2;
+  }
+
+  &__sub {
+    color: var(--color-text-secondary);
+
+    @include text-body-lg;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// work-selected
+// ─────────────────────────────────────────────────────────────────────────────
+
+.work-selected {
+  background-color: var(--color-surface-raised);
+
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    align-items: flex-start;
+  }
+
+  &__list {
+    display: grid;
+    gap: var(--space-2xl) var(--space-lg);
+    inline-size: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(#{rem(320)}, 1fr));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// error-page (404)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.error-page {
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    text-align: center;
+    padding-block: var(--space-3xl);
+  }
+
+  &__code {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    @include text-h1;
+  }
+
+  &__body {
+    max-inline-size: 44ch;
+    color: var(--color-text-secondary);
+
+    @include text-body-lg;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-block-start: var(--space-md);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// page-hero — Figma `page-hero`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.page-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  &__breadcrumb {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    @include text-h1;
+  }
+
+  &__intro {
+    max-inline-size: 46ch;
+    color: var(--color-text-secondary);
+
+    @include text-body-lg;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// post-archive
+// ─────────────────────────────────────────────────────────────────────────────
+
+.post-archive {
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  &__empty {
+    color: var(--color-text-muted);
+  }
+}
+
+.post-list > li:first-child .post-item {
+  padding-block-start: 0;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// article
+//
+// The body is the one place an editor writes free-form HTML, so this styles
+// descendants directly — there are no BEM classes on prose we don't control.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.article {
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  &__meta {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    @include text-h1;
+  }
+
+  &__lead {
+    color: var(--color-text-secondary);
+
+    @include text-body-lg;
+  }
+
+  &__figure {
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+  }
+}
+
+.article-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  color: var(--color-text-secondary);
+
+  @include text-body;
+
+  h2 {
+    margin-block-start: var(--space-xl);
+
+    @include text-h2;
+  }
+
+  h3 {
+    margin-block-start: var(--space-md);
+
+    @include text-h3;
+  }
+
+  ul,
+  ol {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding-inline-start: var(--space-lg);
+  }
+
+  ul {
+    list-style: disc;
+  }
+
+  ol {
+    list-style: decimal;
+  }
+
+  blockquote {
+    padding-inline-start: var(--space-lg);
+    border-inline-start: 2px solid var(--color-border-accent);
+    color: var(--color-text-primary);
+  }
+
+  pre {
+    overflow-x: auto;
+    padding: var(--space-lg);
+    background-color: var(--color-surface-overlay);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+  }
+
+  img {
+    border-radius: var(--radius-md);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// page-hero-section — the ACF section wrapper around .page-hero
+// ─────────────────────────────────────────────────────────────────────────────
+
+.page-hero-section {
+  @include section-spacing;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// stat-row
+// ─────────────────────────────────────────────────────────────────────────────
+
+.stat-row {
+  @include section-spacing;
+
+  &__inner {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(#{rem(140)}, 1fr));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// media-full
+// ─────────────────────────────────────────────────────────────────────────────
+
+.media-full {
+  @include section-spacing;
+
+  &__figure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  &__figure img {
+    inline-size: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+  }
+
+  &__caption {
+    color: var(--color-text-muted);
+
+    @include text-small;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// text-blocks
+// ─────────────────────────────────────────────────────────────────────────────
+
+.text-blocks {
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+}
+
+.text-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  &__heading {
+    @include text-h3;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// media-text
+// ─────────────────────────────────────────────────────────────────────────────
+
+.media-text {
+  @include section-spacing;
+
+  &__inner {
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: start;
+
+    @include from($bp-tablet) {
+      grid-template-columns: 1fr #{rem(440)};
+    }
+  }
+
+  // `order` rather than row-reverse: flex and grid already mirror themselves
+  // under dir="rtl", so reversing would reverse twice.
+  &__inner--media-start {
+    @include from($bp-tablet) {
+      grid-template-columns: #{rem(440)} 1fr;
+
+      .media-text__media {
+        order: -1;
+      }
+    }
+  }
+
+  &__media img {
+    inline-size: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// rich-text
+// ─────────────────────────────────────────────────────────────────────────────
+
+.rich-text {
+  @include section-spacing;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// contact-block
+// ─────────────────────────────────────────────────────────────────────────────
+
+.contact-block {
+  @include section-spacing;
+
+  &__inner {
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: start;
+
+    @include from($bp-tablet) {
+      grid-template-columns: 1fr #{rem(300)};
+    }
+  }
+
+  &__details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  align-items: flex-start;
+
+  .form-field {
+    inline-size: 100%;
+  }
+
+  // The honeypot is hidden from sight and from assistive tech alike. Not
+  // display:none — some bots skip anything display:none, and this needs to
+  // look reachable to them.
+  &__trap {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.contact-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+
+  &__label {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__value {
+    color: var(--color-text-primary);
+
+    @include text-body;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+
+      &:hover {
+        color: var(--color-text-accent);
+      }
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// work-archive
+// ─────────────────────────────────────────────────────────────────────────────
+
+.work-archive {
+  @include section-spacing;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  &__grid {
+    display: grid;
+    gap: var(--space-2xl) var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(#{rem(320)}, 1fr));
+  }
+
+  &__empty {
+    color: var(--color-text-muted);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// article columns — body on the start edge, TOC on the end
+// ─────────────────────────────────────────────────────────────────────────────
+
+.article__columns {
+  display: grid;
+  gap: var(--space-2xl);
+  align-items: start;
+
+  @include from($bp-desktop) {
+    grid-template-columns: minmax(0, #{rem(760)}) #{rem(260)};
+    justify-content: space-between;
+  }
+}
+
+.article__aside {
+  // Below the desktop breakpoint the sticky column would sit above the article
+  // and push the whole body down, so it simply doesn't render there.
+  display: none;
+
+  @include from($bp-desktop) {
+    display: block;
+  }
+}

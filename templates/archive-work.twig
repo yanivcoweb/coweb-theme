@@ -1,0 +1,51 @@
+{% extends "base.twig" %}
+
+{#
+	Work index. A project grid, not a post list, which is why it does not
+	inherit from index.twig.
+#}
+
+{% block content %}
+	<section class="work-archive">
+		<div class="container work-archive__inner">
+
+			<header class="page-hero">
+				{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+				<h1 class="page-hero__title">{{ title|default('עבודות') }}</h1>
+				{% if description %}
+					<p class="page-hero__intro">{{ description }}</p>
+				{% endif %}
+			</header>
+
+			{% set filters = work_filters() %}
+			{% if filters|length > 1 %}
+				<ul class="tag-list" role="list">
+					{% for filter in filters %}
+						<li>
+							{% include 'partials/ui/tag-chip.twig' with {
+								label: filter.label,
+								url: filter.url,
+								active: filter.active
+							} only %}
+						</li>
+					{% endfor %}
+				</ul>
+			{% endif %}
+
+			{% if posts %}
+				<ul class="work-archive__grid">
+					{% for post in posts %}
+						<li>
+							{% include 'partials/ui/project-card.twig' with { post: post, level: 2 } only %}
+						</li>
+					{% endfor %}
+				</ul>
+
+				{% include 'partials/ui/pagination.twig' with { pagination: posts.pagination(3) } only %}
+			{% else %}
+				<p class="work-archive__empty">אין כאן פרויקטים עדיין.</p>
+			{% endif %}
+
+		</div>
+	</section>
+{% endblock %}

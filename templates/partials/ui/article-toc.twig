@@ -1,0 +1,15 @@
+{#
+	Maps to the Figma `article-toc` component.
+
+	Ships empty and hidden. assets/js/toc.js fills it from the rendered h2
+	nodes and unhides it — so with no JavaScript there is no empty widget,
+	there is nothing.
+
+	The active marker sits on the start edge, which is the right in RTL:
+	border-inline-start, never border-left.
+#}
+
+<nav class="article-toc" data-toc hidden aria-labelledby="toc-heading">
+	<p class="article-toc__heading" id="toc-heading">בעמוד הזה</p>
+	<ul class="article-toc__list" data-toc-list></ul>
+</nav>

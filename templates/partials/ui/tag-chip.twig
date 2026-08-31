@@ -1,0 +1,17 @@
+{#
+	Maps to the Figma `tag-chip` component set (State=default | active).
+
+	A chip is a link when it filters something and plain text when it just
+	labels something. `active` drives aria-current, not only the colour —
+	colour alone carries no meaning.
+#}
+
+{% if url %}
+	<a
+		class="tag-chip{{ active ? ' tag-chip--active' : '' }}"
+		href="{{ url }}"
+		{% if active %}aria-current="true"{% endif %}
+	>{{ label }}</a>
+{% else %}
+	<span class="tag-chip{{ active ? ' tag-chip--active' : '' }}">{{ label }}</span>
+{% endif %}

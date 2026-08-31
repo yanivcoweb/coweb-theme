@@ -1,0 +1,58 @@
+{% extends "base.twig" %}
+
+{#
+	Article page. The body is the only place in the theme where the editor
+	writes free-form HTML, so `.article-body` styles descendants directly
+	rather than expecting BEM classes on prose it doesn't control.
+
+	The TOC sits on the end edge (left in RTL) as a secondary column, and is
+	built by JS from the rendered h2 nodes.
+#}
+
+{% block content %}
+	<article class="article">
+		<div class="container article__inner">
+
+			<header class="article__header">
+				{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+
+				<p class="article__meta">
+					<time datetime="{{ post.date('c') }}">{{ post.date('d.m.Y') }}</time>
+					{% set category = post.terms('category')|first %}
+					{% if category %} · {{ category.title }}{% endif %}
+				</p>
+
+				<h1 class="article__title">{{ post.title }}</h1>
+
+				{% if post.excerpt %}
+					<p class="article__lead">{{ post.excerpt }}</p>
+				{% endif %}
+			</header>
+
+			{% if post.thumbnail %}
+				<figure class="article__figure">
+					<img
+						src="{{ post.thumbnail.src('large') }}"
+						srcset="{{ post.thumbnail.srcset }}"
+						sizes="(min-width: 75rem) 1200px, 100vw"
+						alt="{{ post.thumbnail.alt }}"
+						width="{{ post.thumbnail.width }}"
+						height="{{ post.thumbnail.height }}"
+						decoding="async"
+					>
+				</figure>
+			{% endif %}
+
+			<div class="article__columns">
+				<div class="article-body" data-toc-source>
+					{{ post.content }}
+				</div>
+
+				<aside class="article__aside">
+					{% include 'partials/ui/article-toc.twig' with {} only %}
+				</aside>
+			</div>
+
+		</div>
+	</article>
+{% endblock %}

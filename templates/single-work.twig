@@ -1,0 +1,10 @@
+{% extends "page.twig" %}
+
+{#
+	A case study composes from the same section stack as a page, so the loop in
+	page.twig is the whole template. `work` is registered with the same
+	`sections` field group for exactly this reason.
+
+	If work-single ever needs something a page can't express, add a section
+	layout — not a second loop.
+#}

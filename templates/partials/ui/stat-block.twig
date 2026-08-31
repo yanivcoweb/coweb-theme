@@ -1,0 +1,13 @@
+{#
+	Maps to the Figma `stat-block` component.
+
+	The value is wrapped in a span that forces LTR: a figure like "40+" or
+	"1.4s" would otherwise get reordered by the bidi algorithm inside the RTL
+	column, and "1.4s" is exactly the kind of thing that silently becomes
+	"s1.4" in production.
+#}
+
+<div class="stat-block">
+	<p class="stat-block__value"><span>{{ value }}</span></p>
+	<p class="stat-block__label">{{ label }}</p>
+</div>

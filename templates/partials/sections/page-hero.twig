@@ -1,0 +1,30 @@
+{#
+	ACF layout: page_hero — Figma `page-hero`.
+
+	The inner-page counterpart to hero_main: breadcrumb, h1, intro. Same rule
+	applies — one per page, and it carries the h1.
+#}
+
+<section class="page-hero-section">
+	<div class="container page-hero">
+
+		{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+
+		{% if section.title %}
+			<h1 class="page-hero__title">{{ section.title }}</h1>
+		{% endif %}
+
+		{% if section.intro %}
+			<p class="page-hero__intro">{{ section.intro }}</p>
+		{% endif %}
+
+		{% if section.tags %}
+			<ul class="tag-list">
+				{% for tag in section.tags %}
+					<li>{% include 'partials/ui/tag-chip.twig' with { label: tag.label } only %}</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+
+	</div>
+</section>

@@ -1,0 +1,29 @@
+{#
+	ACF layout: text_blocks — the challenge / what I did / result body on
+	work-single, and any run of headed prose elsewhere.
+
+	Constrained to the article measure. A 1200px line of Hebrew body copy is
+	unreadable no matter how good the type is.
+
+	`body` is a WYSIWYG field, so it is printed raw. That is safe here because
+	WordPress sanitises on save and only editors can write it — but it is the
+	one place in the theme where markup isn't ours, so don't widen it.
+#}
+
+{% if section.blocks %}
+	<section class="text-blocks">
+		<div class="container-narrow text-blocks__inner">
+			{% for block in section.blocks %}
+				<div class="text-block">
+					{% if block.heading %}
+						<h2 class="text-block__heading">{{ block.heading }}</h2>
+					{% endif %}
+
+					{% if block.body %}
+						<div class="article-body">{{ block.body|raw }}</div>
+					{% endif %}
+				</div>
+			{% endfor %}
+		</div>
+	</section>
+{% endif %}

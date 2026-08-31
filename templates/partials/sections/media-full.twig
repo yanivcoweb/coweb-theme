@@ -1,0 +1,31 @@
+{#
+	ACF layout: media_full — the project screenshot on work-single.
+
+	Alt text comes from the media library's own field. An image with no alt
+	renders alt="" and is announced as decorative, which is correct for a
+	screenshot that the surrounding copy already describes — but wrong for
+	anything carrying information, so fill it in.
+#}
+
+{% if section.image %}
+	<section class="media-full">
+		<div class="{{ section.width == 'narrow' ? 'container-narrow' : 'container' }}">
+			<figure class="media-full__figure">
+				<img
+					src="{{ section.image.src('large') }}"
+					srcset="{{ section.image.srcset }}"
+					sizes="(min-width: 75rem) 1200px, 100vw"
+					alt="{{ section.image.alt }}"
+					width="{{ section.image.width }}"
+					height="{{ section.image.height }}"
+					loading="lazy"
+					decoding="async"
+				>
+
+				{% if section.caption %}
+					<figcaption class="media-full__caption">{{ section.caption }}</figcaption>
+				{% endif %}
+			</figure>
+		</div>
+	</section>
+{% endif %}

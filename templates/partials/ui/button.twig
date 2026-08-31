@@ -1,0 +1,16 @@
+{#
+	Maps to the Figma `button` component.
+
+	Expects an ACF link array: { url, title, target }.
+	`variant` is primary | secondary | ghost, defaulting to primary.
+
+	Renders nothing without a URL — an empty ACF link should leave no trace.
+#}
+
+{% if link.url %}
+	<a
+		class="button button--{{ variant|default('primary') }}"
+		href="{{ link.url }}"
+		{% if link.target %}target="{{ link.target }}" rel="noopener"{% endif %}
+	>{{ link.title|default('בואו נדבר') }}</a>
+{% endif %}

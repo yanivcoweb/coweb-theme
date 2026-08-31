@@ -1,0 +1,58 @@
+{#
+	Global header. RTL: wordmark on the start edge (right), CTA on the end (left).
+
+	No row-reverse — under dir="rtl" flex mirrors itself, so the DOM order is
+	simply the reading order and the browser does the work.
+#}
+
+<header class="site-header">
+	<div class="container site-header__inner">
+
+		<a class="site-header__logo" href="{{ home_url }}" rel="home">
+			<span>co</span><span>web</span>
+		</a>
+
+		<button
+			class="site-header__toggle"
+			type="button"
+			aria-expanded="false"
+			aria-controls="site-nav"
+			data-menu-open
+		>
+			<span class="screen-reader-text">פתיחת תפריט</span>
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+				<path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+			</svg>
+		</button>
+
+		<nav class="site-nav" id="site-nav" aria-label="ניווט ראשי">
+			<button class="site-nav__close" type="button" data-menu-close>
+				<span class="screen-reader-text">סגירת תפריט</span>
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+					<path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+				</svg>
+			</button>
+
+			{% if nav %}
+				<ul class="site-nav__list">
+					{% for item in nav.items %}
+						<li class="site-nav__item">
+							<a
+								class="site-nav__link"
+								href="{{ item.link }}"
+								{% if item.current or item.current_item_ancestor %}aria-current="page"{% endif %}
+							>{{ item.title }}</a>
+						</li>
+					{% endfor %}
+				</ul>
+			{% endif %}
+		</nav>
+
+		{% if cta.url %}
+			<a class="button button--primary site-header__cta" href="{{ cta.url }}"{% if cta.target %} target="{{ cta.target }}" rel="noopener"{% endif %}>
+				{{ cta.title }}
+			</a>
+		{% endif %}
+
+	</div>
+</header>

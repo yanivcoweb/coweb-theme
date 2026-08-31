@@ -1,0 +1,47 @@
+{#
+	Maps to the Figma `project-card` component.
+	Expects a Timber post from the `work` type.
+
+	`level` is the heading level, not the heading size -- the size is fixed by
+	the `text-h3` mixin on .project-card__title either way. It exists because
+	the same card sits at two different depths: under a section's <h2> on the
+	home page, and directly under the page <h1> on the work archive, where an
+	<h3> would skip a level.
+
+	The whole card is a link, but only the title carries it — a nested
+	interactive element inside a wrapping <a> is invalid and breaks keyboard
+	navigation. The ::after in CSS stretches the title's hit area over the card.
+#}
+
+<article class="project-card">
+
+	<div class="project-card__thumbnail">
+		{% if post.thumbnail %}
+			<img
+				src="{{ post.thumbnail.src('large') }}"
+				alt="{{ post.thumbnail.alt|default(post.title) }}"
+				width="{{ post.thumbnail.width }}"
+				height="{{ post.thumbnail.height }}"
+				loading="lazy"
+				decoding="async"
+			>
+		{% endif %}
+	</div>
+
+	{% set tags = post.terms('work_tag') %}
+	{% if tags %}
+		<p class="project-card__meta">
+			{% for tag in tags %}{{ tag.title }}{% if not loop.last %} · {% endif %}{% endfor %}
+		</p>
+	{% endif %}
+
+	{% set heading_level = level|default(3) %}
+	<h{{ heading_level }} class="project-card__title">
+		<a class="project-card__link" href="{{ post.link }}">{{ post.title }}</a>
+	</h{{ heading_level }}>
+
+	{% if post.excerpt %}
+		<p class="project-card__excerpt">{{ post.excerpt }}</p>
+	{% endif %}
+
+</article>

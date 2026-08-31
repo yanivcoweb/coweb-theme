@@ -1,0 +1,32 @@
+{% extends "base.twig" %}
+
+{#
+	The secondary link comes from Site settings rather than a hardcoded slug —
+	a Hebrew permalink is exactly the kind of thing that changes once and
+	silently breaks a 404 page nobody tests.
+#}
+
+{% block content %}
+	<section class="error-page">
+		<div class="container-narrow error-page__inner">
+
+			<p class="error-page__code">404</p>
+			<h1 class="error-page__title">הדף הזה לא קיים</h1>
+			<p class="error-page__body">
+				יכול להיות שהכתובת השתנתה, או שהקישור שהגעתם ממנו ישן.
+			</p>
+
+			<div class="error-page__actions">
+				{% if options.not_found_link.url %}
+					{% include 'partials/ui/button.twig' with {
+						link: options.not_found_link,
+						variant: 'secondary'
+					} only %}
+				{% endif %}
+
+				<a class="button button--primary" href="{{ home_url }}">חזרה לעמוד הבית</a>
+			</div>
+
+		</div>
+	</section>
+{% endblock %}

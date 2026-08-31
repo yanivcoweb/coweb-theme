@@ -1,0 +1,21 @@
+{#
+	Maps to the Figma `section-header` component.
+	ACF: eyebrow, heading, intro.
+
+	`level` lets a caller push the heading down the outline — sections use h2,
+	but a section nested inside another shouldn't restart at h2.
+#}
+
+<div class="section-header">
+	{% if eyebrow %}
+		<p class="section-header__eyebrow">{{ eyebrow }}</p>
+	{% endif %}
+
+	{% if heading %}
+		<h{{ level|default(2) }} class="section-header__heading">{{ heading }}</h{{ level|default(2) }}>
+	{% endif %}
+
+	{% if intro %}
+		<p class="section-header__intro">{{ intro }}</p>
+	{% endif %}
+</div>

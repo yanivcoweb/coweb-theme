@@ -1,0 +1,15 @@
+{#
+	ACF layout: rich_text — the body of a plain content page, such as the
+	accessibility statement.
+
+	Reuses `.article-body`, so prose written here is styled identically to a
+	blog post body. One set of prose rules, not two.
+#}
+
+{% if section.content %}
+	<section class="rich-text">
+		<div class="container-narrow">
+			<div class="article-body">{{ section.content|raw }}</div>
+		</div>
+	</section>
+{% endif %}

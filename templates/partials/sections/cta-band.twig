@@ -1,0 +1,27 @@
+{#
+	ACF layout: cta_band — Figma `cta-band`.
+
+	RTL: copy on the start edge, button on the end. Flex mirrors itself, so the
+	DOM order is just the reading order.
+#}
+
+<section class="cta-band">
+	<div class="container cta-band__inner">
+
+		<div class="cta-band__copy">
+			{% if section.heading %}
+				<h2 class="cta-band__heading">{{ section.heading }}</h2>
+			{% endif %}
+
+			{% if section.sub %}
+				<p class="cta-band__sub">{{ section.sub }}</p>
+			{% endif %}
+		</div>
+
+		{% include 'partials/ui/button.twig' with {
+			link: section.link,
+			variant: 'primary'
+		} only %}
+
+	</div>
+</section>

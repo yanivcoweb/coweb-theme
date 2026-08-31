@@ -1,0 +1,49 @@
+{#
+	Maps to the Figma `form-field` component set (Type × State).
+
+	The label is always a real <label for> — never a placeholder standing in for
+	one, because a placeholder disappears the moment someone starts typing.
+
+	The error state is not just the red border: aria-invalid marks the control
+	and aria-describedby points at the message, so a screen reader is told what
+	the colour is trying to say.
+#}
+
+{% set field_id = 'field-' ~ name %}
+{% set error_id = field_id ~ '-error' %}
+
+<div class="form-field{{ error ? ' form-field--error' : '' }}">
+
+	<label class="form-field__label" for="{{ field_id }}">
+		{{ label }}{% if required %} <span class="form-field__required" aria-hidden="true">*</span>{% endif %}
+	</label>
+
+	{% if type == 'textarea' %}
+		<textarea
+			class="form-field__control form-field__control--textarea"
+			id="{{ field_id }}"
+			name="{{ name }}"
+			rows="5"
+			placeholder="{{ placeholder }}"
+			{% if required %}required aria-required="true"{% endif %}
+			{% if error %}aria-invalid="true" aria-describedby="{{ error_id }}"{% endif %}
+		>{{ value }}</textarea>
+	{% else %}
+		<input
+			class="form-field__control"
+			id="{{ field_id }}"
+			name="{{ name }}"
+			type="{{ type|default('text') }}"
+			value="{{ value }}"
+			placeholder="{{ placeholder }}"
+			{% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+			{% if required %}required aria-required="true"{% endif %}
+			{% if error %}aria-invalid="true" aria-describedby="{{ error_id }}"{% endif %}
+		>
+	{% endif %}
+
+	{% if error %}
+		<p class="form-field__error" id="{{ error_id }}">{{ error }}</p>
+	{% endif %}
+
+</div>

@@ -1,0 +1,645 @@
+@use "functions" as *;
+@use "variables" as *;
+@use "mixins" as *;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// button — Figma `button`, 3 variants × 4 states
+// ─────────────────────────────────────────────────────────────────────────────
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding-block: var(--space-md);
+  padding-inline: var(--space-lg);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-exit);
+
+  @include text-button;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &[aria-disabled="true"],
+  &:disabled {
+    pointer-events: none;
+    transform: none;
+  }
+}
+
+.button--primary {
+  background-color: var(--color-brand-ember);
+  color: var(--color-text-inverse);
+
+  &:hover {
+    background-color: var(--color-brand-ember-hover);
+    color: var(--color-text-inverse);
+  }
+
+  &[aria-disabled="true"],
+  &:disabled {
+    background-color: var(--color-brand-ember-dim);
+    color: var(--color-text-muted);
+  }
+}
+
+.button--secondary {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+
+  &:hover {
+    border-color: var(--color-text-secondary);
+    color: var(--color-text-primary);
+  }
+
+  &[aria-disabled="true"],
+  &:disabled {
+    border-color: var(--color-border-subtle);
+    color: var(--color-text-muted);
+  }
+}
+
+.button--ghost {
+  color: var(--color-text-accent);
+  padding-inline: 0;
+
+  &:hover {
+    color: var(--color-brand-ember-hover);
+  }
+
+  &[aria-disabled="true"],
+  &:disabled {
+    color: var(--color-text-muted);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// section-header — Figma `section-header`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-inline-size: 45rem;
+
+  &__eyebrow {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
+  &__heading {
+    color: var(--color-text-primary);
+
+    @include text-h2;
+  }
+
+  &__intro {
+    color: var(--color-text-secondary);
+
+    @include text-body-lg;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// capability-card — Figma `capability-card`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.capability-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  block-size: 100%;
+  padding: var(--space-xl);
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+
+  &__index {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    color: var(--color-text-primary);
+
+    @include text-h3;
+  }
+
+  &__body {
+    color: var(--color-text-secondary);
+
+    @include text-body;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// process-step — Figma `process-step`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.process-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-block-start: var(--space-lg);
+  border-block-start: 1px solid var(--color-border-subtle);
+
+  &__number {
+    color: var(--color-brand-ember);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: var(--text-size-h2);
+    line-height: 1;
+  }
+
+  &__title {
+    color: var(--color-text-primary);
+
+    @include text-h3;
+  }
+
+  &__body {
+    color: var(--color-text-secondary);
+
+    @include text-small;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Editor-only warning for a section with no partial. Never shown to visitors.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.missing-section {
+  margin-inline: auto;
+  max-inline-size: var(--size-container);
+  padding: var(--space-lg);
+  background-color: var(--color-brand-ember-dim);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+
+  &__title {
+    margin-block-end: var(--space-xs);
+
+    @include text-mono-label;
+  }
+
+  &__body {
+    @include text-small;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// project-card — Figma `project-card`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.project-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  block-size: 100%;
+
+  &__thumbnail {
+    aspect-ratio: 16 / 9;
+    margin-block-end: var(--space-xs);
+    overflow: hidden;
+    background-color: var(--color-surface-overlay);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--motion-fast) var(--ease-standard);
+
+    img {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__meta {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    color: var(--color-text-primary);
+
+    @include text-h3;
+  }
+
+  &__link {
+    color: inherit;
+    text-decoration: none;
+
+    // Stretch the hit area across the card. Doing it this way keeps a single
+    // interactive element — wrapping the card in an <a> would nest the tag
+    // links inside it, which is invalid and unusable by keyboard.
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+    }
+
+    // The ring belongs on the stretched area, not on the title text.
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        outline: 2px solid var(--color-text-primary);
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  &__excerpt {
+    color: var(--color-text-secondary);
+
+    @include text-body;
+  }
+
+  &:hover &__thumbnail {
+    border-color: var(--color-border-strong);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// post-item — Figma `post-item`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.post-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-lg);
+  padding-block: var(--space-lg);
+  border-block-end: 1px solid var(--color-border-subtle);
+
+  &__thumbnail {
+    flex: 0 0 auto;
+    inline-size: #{rem(200)};
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background-color: var(--color-surface-overlay);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+    transition: border-color var(--motion-fast) var(--ease-standard);
+
+    img {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+    }
+
+    @include below($bp-tablet) {
+      inline-size: #{rem(88)};
+      aspect-ratio: 1;
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+
+    // Without this a long unbroken token (a URL, a slug) refuses to shrink and
+    // pushes the thumbnail off the row.
+    min-inline-size: 0;
+  }
+
+  &__meta {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    @include text-h3;
+  }
+
+  &__link {
+    color: var(--color-text-primary);
+    text-decoration: none;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        outline: 2px solid var(--color-text-primary);
+        outline-offset: -2px;
+        border-radius: var(--radius-md);
+      }
+    }
+  }
+
+  &__excerpt {
+    color: var(--color-text-secondary);
+
+    @include text-body;
+  }
+
+  &:hover &__thumbnail {
+    border-color: var(--color-border-strong);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// pagination — Figma `pagination`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-block-start: var(--space-2xl);
+
+  &__list {
+    display: flex;
+    gap: var(--space-xs);
+  }
+
+  &__page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: #{rem(44)};
+    block-size: #{rem(44)};
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+    transition:
+      border-color var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+
+    @include text-small;
+
+    &:hover {
+      border-color: var(--color-border-strong);
+      color: var(--color-text-primary);
+    }
+
+    &--current {
+      border-color: var(--color-border-accent);
+      color: var(--color-text-accent);
+    }
+  }
+
+  &__ellipsis {
+    display: inline-flex;
+    align-items: center;
+    block-size: #{rem(44)};
+    color: var(--color-text-muted);
+  }
+
+  &__step {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+
+    @include text-small;
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// tag-chip — Figma `tag-chip` (State=default | active)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-md);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+
+  @include text-small;
+
+  &:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-text-primary);
+  }
+
+  &--active {
+    background-color: var(--color-brand-ember-dim);
+    border-color: var(--color-border-accent);
+    color: var(--color-text-accent);
+
+    &:hover {
+      color: var(--color-text-accent);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// stat-block — Figma `stat-block`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+
+  &__value {
+    color: var(--color-text-primary);
+
+    @include text-h1;
+
+    // A figure like "40+" or "1.4s" is reordered by the bidi algorithm inside
+    // an RTL column. Isolating it is the difference between 1.4s and s1.4.
+    span {
+      display: inline-block;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+  }
+
+  &__label {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// breadcrumbs
+// ─────────────────────────────────────────────────────────────────────────────
+
+.breadcrumbs {
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__item + &__item::before {
+    content: "·";
+    margin-inline-end: var(--space-xs);
+  }
+
+  &__link {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// form-field — Figma `form-field` (Type × State)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+
+  &__label {
+    color: var(--color-text-secondary);
+
+    @include text-mono-label;
+  }
+
+  &__required {
+    color: var(--color-feedback-error);
+  }
+
+  &__control {
+    inline-size: 100%;
+    padding-block: var(--space-md);
+    padding-inline: var(--space-md);
+    color: var(--color-text-primary);
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--motion-fast) var(--ease-standard);
+
+    @include text-body;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    // Focus is the ring and nothing else — the same treatment as every other
+    // interactive element. Changing the border here too would make the form
+    // the one place with its own focus language.
+
+    &:disabled {
+      color: var(--color-text-muted);
+      background-color: var(--color-surface-base);
+      border-color: var(--color-border-subtle);
+    }
+
+    &--textarea {
+      min-block-size: #{rem(150)};
+      resize: vertical;
+    }
+  }
+
+  &--error &__control {
+    border-color: var(--color-feedback-error);
+  }
+
+  &__error {
+    color: var(--color-feedback-error);
+
+    @include text-small;
+  }
+}
+
+.form-notice {
+  padding: var(--space-md);
+  border: 1px solid;
+  border-radius: var(--radius-md);
+
+  @include text-body;
+
+  &--success {
+    color: var(--color-accent-mint);
+    border-color: var(--color-accent-mint);
+  }
+
+  &--error {
+    color: var(--color-feedback-error);
+    border-color: var(--color-feedback-error);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// article-toc — Figma `article-toc`
+// ─────────────────────────────────────────────────────────────────────────────
+
+.article-toc {
+  position: sticky;
+  inset-block-start: var(--space-2xl);
+
+  &[hidden] {
+    display: none;
+  }
+
+  &__heading {
+    padding-block-end: var(--space-sm);
+    color: var(--color-text-muted);
+    border-block-end: 1px solid var(--color-border-subtle);
+
+    @include text-mono-label;
+  }
+
+  &__link {
+    display: block;
+    padding-block: var(--space-sm);
+
+    // The active marker sits on the start edge — the right in RTL.
+    // border-inline-start, never border-left.
+    padding-inline-start: var(--space-sm);
+    border-inline-start: 2px solid var(--color-border-subtle);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition:
+      border-color var(--motion-base) var(--ease-standard),
+      color var(--motion-base) var(--ease-standard);
+
+    @include text-small;
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+
+    &[aria-current] {
+      border-inline-start-color: var(--color-border-accent);
+      color: var(--color-text-accent);
+    }
+  }
+}

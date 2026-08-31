@@ -1,0 +1,37 @@
+{#
+	ACF layout: media_text — the portrait-and-bio row on about.
+
+	DOM order is text then media, which under dir="rtl" puts the prose on the
+	start edge (right) and the image on the end (left) — the arrangement the
+	design uses.
+
+	`media_start` flips it with the `order` property rather than
+	`flex-direction: row-reverse`, which would double-reverse under RTL. Reading
+	order stays prose-then-image either way, which is the sensible order to
+	hear it in.
+#}
+
+<section class="media-text">
+	<div class="container media-text__inner{{ section.media_start ? ' media-text__inner--media-start' : '' }}">
+
+		<div class="media-text__body article-body">
+			{{ section.body|raw }}
+		</div>
+
+		{% if section.image %}
+			<figure class="media-text__media">
+				<img
+					src="{{ section.image.src('large') }}"
+					srcset="{{ section.image.srcset }}"
+					sizes="(min-width: 48rem) 440px, 100vw"
+					alt="{{ section.image.alt }}"
+					width="{{ section.image.width }}"
+					height="{{ section.image.height }}"
+					loading="lazy"
+					decoding="async"
+				>
+			</figure>
+		{% endif %}
+
+	</div>
+</section>

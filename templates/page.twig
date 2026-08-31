@@ -1,0 +1,29 @@
+{% extends "base.twig" %}
+
+{#
+	Every page is a `sections` Flexible Content field. There is no other page
+	layout mechanism, and nothing is hardcoded here — the loop resolves an ACF
+	layout name to a partial and passes it the row.
+
+	ACF is snake_case, the filesystem is kebab-case. `hero_main` → `hero-main.twig`.
+	Never rename one side without the other.
+
+	The include list has a fallback: a layout with no partial renders
+	_missing.twig, which warns an editor instead of failing silently.
+#}
+
+{% block content %}
+	{% for section in post.meta('sections') %}
+		{% include
+			[
+				'partials/sections/' ~ section.acf_fc_layout|replace({'_': '-'}) ~ '.twig',
+				'partials/_missing.twig'
+			]
+			with {
+				section: section,
+				layout: section.acf_fc_layout,
+				position: loop.index
+			} only
+		%}
+	{% endfor %}
+{% endblock %}

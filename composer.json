@@ -1,0 +1,5 @@
+{
+    "require": {
+        "timber/timber": "^2.0"
+    }
+}

@@ -1,0 +1,42 @@
+@use "sass:math";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fluid type
+//
+// The Figma file carries two modes of every size token: `Dark` holds the
+// 1440px value, `Mobile` holds the 390px one. Those are the two ends of the
+// clamp() this function builds, so a heading interpolates continuously between
+// them and there is no per-heading media query to keep in sync.
+//
+// Never write a raw font-size. If a size is missing, add the token.
+// ─────────────────────────────────────────────────────────────────────────────
+
+$fluid-min-vw: 390 !default;
+$fluid-max-vw: 1440 !default;
+
+/// Convert a pixel value to rem against a 16px root.
+///
+/// rem, not px, so the whole scale still responds to a browser font-size
+/// preference — required by the accessibility statement.
+@function rem($px) {
+  @return math.div($px, 16) * 1rem;
+}
+
+/// Interpolate between a 390px value and a 1440px value.
+///
+/// @param {Number} $min-px - size at 390px viewport
+/// @param {Number} $max-px - size at 1440px viewport
+@function fluid($min-px, $max-px) {
+  @if $min-px == $max-px {
+    @return rem($min-px);
+  }
+
+  $slope: math.div($max-px - $min-px, $fluid-max-vw - $fluid-min-vw);
+  $intercept: $min-px - $slope * $fluid-min-vw;
+
+  @return clamp(
+    #{rem($min-px)},
+    #{rem($intercept)} + #{$slope * 100}vw,
+    #{rem($max-px)}
+  );
+}

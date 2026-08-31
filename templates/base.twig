@@ -1,0 +1,40 @@
+<!doctype html>
+{#
+	`site.language` returns the raw WordPress locale (he_IL), which is not a
+	valid HTML language tag. get_bloginfo('language') returns the hyphenated
+	form (he-IL), which is.
+
+	dir comes from is_rtl() rather than being hardcoded — the site ships in
+	Hebrew only, but the CSS is already direction-agnostic and there is no
+	reason for the one hardcoded assumption to live here.
+#}
+<html lang="{{ function('get_bloginfo', 'language') }}" dir="{{ function('is_rtl') ? 'rtl' : 'ltr' }}">
+<head>
+	<meta charset="{{ site.charset|default('UTF-8') }}">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	{{ function('wp_head') }}
+</head>
+
+<body class="{{ body_class }}">
+
+	<a class="skip-link" href="#main">דילוג לתוכן</a>
+
+	{% include 'partials/site-header.twig' with {
+		nav: primary_nav,
+		cta: options.header_cta,
+		home_url: home_url
+	} only %}
+
+	<main id="main" class="site-main">
+		{% block content %}{% endblock %}
+	</main>
+
+	{% include 'partials/site-footer.twig' with {
+		email: options.contact_email,
+		phone: options.contact_phone,
+		linkedin: options.linkedin_url
+	} only %}
+
+	{{ function('wp_footer') }}
+</body>
+</html>
