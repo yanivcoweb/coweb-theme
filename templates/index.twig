@@ -15,7 +15,10 @@
 				{% endif %}
 			</header>
 
-			{% if posts %}
+			{# `posts` is a Timber PostQuery, which extends ArrayObject: Countable,
+			   but an object, so plain `{% if posts %}` is true even when it holds
+			   nothing and the empty state below is unreachable. `|length` counts. #}
+			{% if posts|length %}
 				<ul class="post-list">
 					{% for post in posts %}
 						<li>

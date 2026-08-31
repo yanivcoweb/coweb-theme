@@ -458,6 +458,40 @@
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// search-form
+// ─────────────────────────────────────────────────────────────────────────────
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  // The heading already says "search", so the label is for assistive tech
+  // only. It stays in the DOM rather than becoming a placeholder, because a
+  // placeholder disappears the moment someone starts typing.
+  &__label {
+    @include visually-hidden;
+  }
+
+  &__row {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  &__control {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+
+  @include below($bp-tablet) {
+    &__row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // article
 //
 // The body is the one place an editor writes free-form HTML, so this styles

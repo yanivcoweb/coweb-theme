@@ -1,0 +1,84 @@
+{% extends "base.twig" %}
+
+{#
+	Search results.
+
+	Without this file WordPress falls back to index.twig, which renders the blog
+	archive under the heading "בלוג" — no search term, no count, and no way to
+	tell an empty result from an empty blog.
+
+	The term is wrapped in <bdi> everywhere it appears. A query is user input and
+	is frequently Latin (`WPML`, `ACF`, `Core Web Vitals`), which would otherwise
+	set the base direction of the line it opens and strand the Hebrew around it
+	on the wrong edge. <bdi> isolates it without touching the alignment.
+
+	The form is shown on both states, not only the empty one: refining a query
+	that returned too much is as common as retrying one that returned nothing.
+#}
+
+{% block content %}
+	<section class="post-archive">
+		<div class="container post-archive__inner">
+
+			<header class="page-hero">
+				{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+
+				<h1 class="page-hero__title">
+					{%- if search_query -%}
+						תוצאות חיפוש עבור <bdi>{{ search_query }}</bdi>
+					{%- else -%}
+						חיפוש באתר
+					{%- endif -%}
+				</h1>
+
+				{% if search_query %}
+					<p class="page-hero__intro" role="status">
+						{%- if result_count == 0 -%}
+							לא נמצאו תוצאות.
+						{%- elseif result_count == 1 -%}
+							נמצאה תוצאה אחת.
+						{%- else -%}
+							נמצאו {{ result_count }} תוצאות.
+						{%- endif -%}
+					</p>
+				{% endif %}
+			</header>
+
+			<form class="search-form" role="search" method="get" action="{{ home_url }}">
+				<label class="search-form__label" for="search-field">חיפוש באתר</label>
+				<div class="search-form__row">
+					<input
+						class="form-field__control search-form__control"
+						id="search-field"
+						type="search"
+						name="s"
+						value="{{ search_query }}"
+						placeholder="מה אתם מחפשים?"
+					>
+					<button class="button button--primary" type="submit">חיפוש</button>
+				</div>
+			</form>
+
+			{# `posts` is a Timber PostQuery, which extends ArrayObject: Countable,
+			   but an object, so plain `{% if posts %}` is true even when it holds
+			   nothing and the empty state below is unreachable. `|length` counts. #}
+			{% if posts|length %}
+				<ul class="post-list">
+					{% for post in posts %}
+						<li>
+							{% include 'partials/ui/post-item.twig' with { post: post } only %}
+						</li>
+					{% endfor %}
+				</ul>
+
+				{% include 'partials/ui/pagination.twig' with { pagination: posts.pagination(3) } only %}
+			{% elseif search_query %}
+				<p class="post-archive__empty">
+					לא נמצא כלום עבור <bdi>{{ search_query }}</bdi>. אפשר לנסות מונח קצר יותר,
+					או לעבור <a href="{{ home_url }}">לעמוד הבית</a>.
+				</p>
+			{% endif %}
+
+		</div>
+	</section>
+{% endblock %}
