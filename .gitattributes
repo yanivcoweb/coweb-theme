@@ -1,0 +1,8 @@
+# Deploy target is Linux (Cloudways), development is Windows. Normalise every
+# text file to LF in the repository so a checkout on either side can't smuggle
+# CRLF into production.
+* text=auto eol=lf
+
+# Compiled gettext catalogue — binary, must never be line-ending converted or
+# WordPress reads a corrupt file at runtime.
+*.mo binary
