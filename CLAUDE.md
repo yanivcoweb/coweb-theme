@@ -376,10 +376,14 @@ Measured, not assumed: at 1440 the hero `h1` computes to 64px on `#0b0c0e`; at
 390 the same heading computes to 38px. Those are the `Dark` and `Mobile` values
 of `text/size/display`, so the `clamp()` does what the two Figma modes promise.
 Every colour token in `_variables.scss` was compared against
-`get_variable_defs` and all nine match to the hex. 48 route × width checks
-(9 routes × 4 widths) show zero horizontal overflow, exactly one `<h1>` per
-page, no skipped heading levels, no physical `text-align`, no unlabelled
-images, no empty links. The focus ring was confirmed by real keyboard Tab —
+`get_variable_defs` and all nine match to the hex. 36 route × width checks
+(9 routes × 4 widths, search results and empty-search included) show zero
+horizontal overflow, exactly one `<h1>` per page, no skipped heading levels, no
+physical `text-align`, no unlabelled images, no empty links. Every screen was
+also looked at individually, not only swept: the TOC fills from the rendered
+`h2`s and its active marker sits on the start edge, the work archive's filter
+chips put the active one on the right, and the 404 renders its single button
+because the optional second link has no URL in the rig. The focus ring was confirmed by real keyboard Tab —
 `2px solid #f4f5f7` at 2px offset, one global `:focus-visible` rule.
 
 The contact form round-trips through all four paths (expired / sent / error /
