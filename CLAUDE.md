@@ -59,7 +59,7 @@ templates/
   page.twig                    flexible content loop — no hardcoded layout
   single-work.twig             extends page.twig; a case study is sections too
   archive-work.twig            project grid + tag filters
-  index.twig / archive.twig / single.twig / 404.twig
+  index.twig / archive.twig / single.twig / search.twig / 404.twig
   partials/
     _missing.twig              editor-facing warning for an unbacked layout
     site-header.twig / site-footer.twig
@@ -353,7 +353,15 @@ matching partial and block — the naming chain is unbroken end to end. Every
 screen has a template behind it: home, work index and single, about, contact,
 blog index/single/category, a generic content page, and 404.
 
-Not built: search results.
+Search results are `search.php` + `templates/search.twig`. Without that pair
+WordPress falls back to `index.php`, which renders the blog archive under the
+heading "בלוג" — no term, no count, and no way to tell an empty result from an
+empty blog.
+
+`posts` is a Timber `PostQuery`, which extends `ArrayObject`: Countable, but an
+object, so `{% if posts %}` is true even when it holds nothing. Test
+`posts|length` — every empty state in the theme was unreachable until this was
+found.
 
 **It has been looked at.** 2026-08-27, in real Chrome, at 390 / 768 / 1024 /
 1440. This is the thing the previous two sessions could not do — the in-app
