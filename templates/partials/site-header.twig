@@ -26,12 +26,30 @@
 		</button>
 
 		<nav class="site-nav" id="site-nav" aria-label="ניווט ראשי">
-			<button class="site-nav__close" type="button" data-menu-close>
-				<span class="screen-reader-text">סגירת תפריט</span>
-				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-					<path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-				</svg>
-			</button>
+
+			{#
+				The drawer is position:fixed inset:0, so it covers the header
+				it opened from — including the wordmark. Figma repeats the
+				wordmark here for that reason (mobile-menu-open, 95:12).
+
+				It is decorative, not a second way home: the header's own logo
+				is one tab stop away behind the overlay, and a duplicate link
+				to the same URL is a duplicate stop for a screen reader. So it
+				is a span, not an anchor, and aria-hidden sits on the wordmark
+				itself — never on the bar, which would take the close button
+				out of the accessibility tree with it and leave a focusable
+				control inside a hidden subtree.
+			#}
+			<div class="site-nav__bar">
+				<span class="site-nav__logo" aria-hidden="true"><span>co</span><span>web</span></span>
+
+				<button class="site-nav__close" type="button" data-menu-close>
+					<span class="screen-reader-text">סגירת תפריט</span>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+						<path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					</svg>
+				</button>
+			</div>
 
 			{% if nav %}
 				<ul class="site-nav__list">
@@ -46,6 +64,32 @@
 					{% endfor %}
 				</ul>
 			{% endif %}
+
+			{#
+				Figma `menu-bottom` (95:24): the CTA on the start edge, then
+				email and phone. Mobile only — above the tablet breakpoint the
+				CTA sits in the header bar and the footer carries the rest.
+
+				This block is why the drawer used to look wrong. It was never
+				built, so the drawer had exactly two children and the
+				space-between meant to separate three of them pushed the nav
+				list to the floor.
+			#}
+			<div class="site-nav__footer">
+				{% if cta.url %}
+					<a class="button button--primary" href="{{ cta.url }}"{% if cta.target %} target="{{ cta.target }}" rel="noopener"{% endif %}>
+						{{ cta.title }}
+					</a>
+				{% endif %}
+
+				{% if email %}
+					<a class="site-nav__contact" href="mailto:{{ email }}">{{ email }}</a>
+				{% endif %}
+
+				{% if phone %}
+					<a class="site-nav__contact" href="tel:{{ phone|replace({'-': '', ' ': ''}) }}">{{ phone }}</a>
+				{% endif %}
+			</div>
 		</nav>
 
 		{% if cta.url %}

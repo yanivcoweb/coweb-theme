@@ -52,6 +52,23 @@ add_action(
 			)
 		);
 
+		/*
+		 * Section reveal. Ships everywhere, because every template renders
+		 * sections — but the script arms nothing under reduced motion and
+		 * nothing that is already on screen, so on a short page it costs a
+		 * single pass and no observer at all.
+		 */
+		wp_enqueue_script(
+			'coweb-reveal',
+			COWEB_URI . '/assets/js/reveal.js',
+			array(),
+			coweb_asset_version( 'assets/js/reveal.js' ),
+			array(
+				'strategy'  => 'defer',
+				'in_footer' => true,
+			)
+		);
+
 		// The TOC only exists on article pages, so it only ships there.
 		if ( is_singular( 'post' ) ) {
 			wp_enqueue_script(

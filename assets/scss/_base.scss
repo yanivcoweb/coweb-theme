@@ -173,3 +173,44 @@ pre {
     scroll-behavior: auto !important;
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Section reveal
+//
+// The one entry on the behaviour map that needs a script: opacity and
+// translateY(8px), `slow`, `entrance`. Everything else on that map is a
+// hover or a state change and lives with its component.
+//
+// `data-reveal-item` is the whole gate. assets/js/reveal.js adds it only to a
+// section its IntersectionObserver has just reported as outside the viewport,
+// so the hidden state can never apply to something a visitor can see, and a
+// page with no JavaScript — or with a broken script — renders every section at
+// rest rather than blank.
+//
+// 8px is --space-xs, not a loose value; the delay comes from the script, one
+// step of 60ms per position in the row.
+// ─────────────────────────────────────────────────────────────────────────────
+
+[data-reveal-item] {
+  opacity: 0;
+  transform: translateY(var(--space-xs));
+  transition:
+    opacity var(--motion-slow) var(--ease-entrance),
+    transform var(--motion-slow) var(--ease-entrance);
+  transition-delay: var(--reveal-delay, 0ms);
+
+  &[data-revealed] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// The script declines to arm under reduced motion, so this only matters when
+// the preference is turned on *after* load — at which point anything still
+// waiting on the observer would otherwise never arrive.
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+  }
+}

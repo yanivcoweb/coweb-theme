@@ -84,6 +84,13 @@
     }
   }
 
+  // The drawer's own chrome. Above the breakpoint the nav is an inline list
+  // inside the header bar and neither of these has anything to do.
+  &__bar,
+  &__footer {
+    display: none;
+  }
+
   @include below($bp-tablet) {
     // transform has no logical form, so the sign is flipped by hand.
     // RTL parks the drawer off the right edge; LTR flips it below.
@@ -97,24 +104,88 @@
     padding: var(--space-lg);
     background-color: var(--color-surface-base);
     transform: translateX(calc(100% * var(--slide)));
+    opacity: 0;
     visibility: hidden;
+
+    // The closed rule carries the *exit*: it is what plays when data-open is
+    // removed. The behaviour map gives open and close different values —
+    // `menu open  base  entrance`, `menu close  fast  exit` — and a single
+    // shared transition can only ever be one of them. Entrance is slower than
+    // exit on purpose: a fast exit reads as responsive, a fast entrance reads
+    // as jumpy.
+    //
+    // The visibility delay tracks the duration on each side, or the drawer
+    // vanishes before it has finished leaving.
     transition:
-      transform var(--motion-base) var(--ease-entrance),
-      visibility 0s linear var(--motion-base);
+      transform var(--motion-fast) var(--ease-exit),
+      opacity var(--motion-fast) var(--ease-exit),
+      visibility 0s linear var(--motion-fast);
 
     &[data-open] {
       transform: translateX(0);
+      opacity: 1;
       visibility: visible;
       transition:
         transform var(--motion-base) var(--ease-entrance),
+        opacity var(--motion-base) var(--ease-entrance),
         visibility 0s;
+    }
+
+    // Figma menu-bar (95:9): wordmark on the start edge, close on the end.
+    &__bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-lg);
+    }
+
+    &__logo {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: #{rem(26)};
+      line-height: 1;
+      color: var(--color-text-primary);
+
+      // Two-tone until the wordmark becomes a real vector, same as the header.
+      span:first-child {
+        color: var(--color-brand-ember);
+      }
+    }
+
+    // Figma menu-bottom (95:24). `auto` rather than space-between on the
+    // parent: the drawer has three children of very different heights, and
+    // distributing them would pull the nav list away from the bar.
+    &__footer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-lg);
+      margin-block-start: auto;
+      padding-block-start: var(--space-2xl);
+    }
+
+    &__contact {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+
+      // Email and phone stay LTR inside the RTL drawer — the mixin isolates
+      // the run without touching how the line is aligned.
+      @include text-code;
+
+      font-size: var(--text-size-mono);
+
+      &:hover {
+        color: var(--color-text-primary);
+      }
     }
 
     &__list {
       flex-direction: column;
       align-items: stretch;
       gap: 0;
-      margin-block-start: var(--space-3xl);
+      // Figma runs menu-nav straight under menu-bar. The old 3xl was holding
+      // the list off a bar that did not exist yet.
+      margin-block-start: var(--space-lg);
     }
 
     &__item {
@@ -136,7 +207,6 @@
 }
 
 .site-nav__close {
-  align-self: flex-end;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -281,10 +351,23 @@
     gap: var(--space-2xl);
   }
 
+  // Figma: one across at 390, three across at 1440 — 384px cards in the
+  // 1200px container. The count is explicit rather than `auto-fit` because
+  // auto-fit derives its columns from the track floor, not from the design:
+  // minmax(280px) fits four tracks at 1200, so six cards rendered 4+2. It
+  // only ever looked right while a section held fewer items than one row.
   &__list {
     display: grid;
     gap: var(--space-lg);
-    grid-template-columns: repeat(auto-fit, minmax(#{rem(280)}, 1fr));
+    grid-template-columns: 1fr;
+
+    @include from($bp-tablet) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include from($bp-desktop) {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 }
 
@@ -301,10 +384,19 @@
     gap: var(--space-2xl);
   }
 
+  // Figma: one across at 390, four across at 1440 (282px steps).
   &__list {
     display: grid;
     gap: var(--space-lg);
-    grid-template-columns: repeat(auto-fit, minmax(#{rem(220)}, 1fr));
+    grid-template-columns: 1fr;
+
+    @include from($bp-tablet) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include from($bp-desktop) {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 }
 
@@ -358,11 +450,17 @@
     align-items: flex-start;
   }
 
+  // Figma: one across at 390, two across at 1440 (588px cards). Two is the
+  // designed maximum — a third selected project belongs on the next row.
   &__list {
     display: grid;
     gap: var(--space-2xl) var(--space-lg);
     inline-size: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(#{rem(320)}, 1fr));
+    grid-template-columns: 1fr;
+
+    @include from($bp-tablet) {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 }
 
@@ -627,10 +725,15 @@
 .stat-row {
   @include section-spacing;
 
+  // Figma: two across at 390 (159px), four across at 1440 (282px).
   &__inner {
     display: grid;
     gap: var(--space-lg);
-    grid-template-columns: repeat(auto-fit, minmax(#{rem(140)}, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+
+    @include from($bp-tablet) {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 }
 
@@ -817,10 +920,16 @@
     gap: var(--space-2xl);
   }
 
+  // Figma work-index: one across at 390, two across at 1440 (588px cards).
+  // minmax(320px) fitted three tracks at 1200, so six projects came out 3+3.
   &__grid {
     display: grid;
     gap: var(--space-2xl) var(--space-lg);
-    grid-template-columns: repeat(auto-fit, minmax(#{rem(320)}, 1fr));
+    grid-template-columns: 1fr;
+
+    @include from($bp-tablet) {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   &__empty {

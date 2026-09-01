@@ -2,9 +2,26 @@
 
 {#
 	A case study composes from the same section stack as a page, so the loop in
-	page.twig is the whole template. `work` is registered with the same
-	`sections` field group for exactly this reason.
+	page.twig is the whole body. `work` is registered with the same `sections`
+	field group for exactly this reason.
 
 	If work-single ever needs something a page can't express, add a section
 	layout — not a second loop.
+
+	The one thing below the stack is next-project, which is *not* a section: it
+	is derived from the query, has no ACF row behind it, and must not be
+	reorderable. It sits here rather than in a layout for the same reason
+	breadcrumbs and pagination do.
+
+	Older first — the archive reads newest to oldest, so the project after this
+	one is the older one. The oldest case study has nothing older, so it falls
+	back to the newer sibling, which closes the loop instead of dead-ending.
 #}
+
+{% block content %}
+	{{ parent() }}
+
+	{% include 'partials/ui/next-project.twig' with {
+		project: post.prev ?: post.next
+	} only %}
+{% endblock %}

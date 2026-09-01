@@ -19,9 +19,13 @@
 
 	<a class="skip-link" href="#main">דילוג לתוכן</a>
 
+	{# email and phone are for the mobile drawer's bottom block, which the
+	   footer's copies are not a substitute for — the drawer covers the page. #}
 	{% include 'partials/site-header.twig' with {
 		nav: primary_nav,
 		cta: options.header_cta,
+		email: options.contact_email,
+		phone: options.contact_phone,
 		home_url: home_url
 	} only %}
 

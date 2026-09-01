@@ -643,3 +643,81 @@
     }
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// next-project
+//
+// Figma: `next-project`, 57:281 desktop / 85:139 mobile. Derived navigation at
+// the foot of a case study — see templates/partials/ui/next-project.twig.
+//
+// Two deliberate departures from the frame, both flagged rather than silent:
+//
+//   - Figma pads the rule by 40px, which is not on the spacing scale
+//     (…24, 32, 48…). Snapped to --space-2xl rather than minting a token for
+//     one frame; 40 reads as a nudge in the file, not a decision.
+//   - The frame sets nowrap. Left as normal wrapping: the titles in the file
+//     are short Latin placeholders, and a real Hebrew project name would run
+//     straight out of the container.
+//
+// No hover motion. The behaviour map on the `Motion` page is closed and
+// next-project is not on it, so the hover is an underline and nothing moves.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.next-project {
+  padding-block-end: var(--space-4xl);
+
+  &__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding-block-start: var(--space-2xl);
+    border-block-start: 1px solid var(--color-border-subtle);
+    color: var(--color-text-primary);
+    text-decoration: none;
+
+    &:hover .next-project__title {
+      text-decoration: underline;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    // flex-start, not flex-end: the design puts this on the right because the
+    // page is Hebrew, and the right *is* the start. flex-end would pin it to
+    // the wrong edge the moment the site renders LTR.
+    align-items: flex-start;
+    gap: var(--space-xs);
+    text-align: start;
+  }
+
+  &__label {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    @include text-h3;
+  }
+
+  // Figma draws the glyph at 32px, which is not on the type ramp. text-h2 is
+  // the nearest token (36 desktop / 25 mobile) and it scales with the ramp,
+  // where a literal 32 would sit still while every heading around it moved.
+  &__arrow {
+    color: var(--color-text-accent);
+
+    @include text-h2;
+
+    // After the mixin: text-h2 carries its own line-height, and a glyph used
+    // as an arrow wants none of it.
+    line-height: 1;
+
+    // The one property with no logical form. The glyph points at the end edge,
+    // which is the left in Hebrew; under LTR it has to be mirrored by hand.
+    [dir="ltr"] & {
+      transform: scaleX(-1);
+    }
+  }
+}

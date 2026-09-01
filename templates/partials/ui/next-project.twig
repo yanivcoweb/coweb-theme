@@ -1,0 +1,29 @@
+{#
+	Next case study, at the foot of a work single.
+
+	Derived navigation, not content. Like breadcrumbs and pagination it comes
+	from the query rather than from ACF — an authored "next project" field
+	would drift the moment a project is inserted between two others, and the
+	drift would be silent.
+
+	The title is wrapped in <bdi>: a project name is usually Latin inside a
+	Hebrew page, and without isolation the surrounding direction reorders it.
+
+	Figma: `next-project` on Inner Pages / Desktop (57:281) and Mobile (85:139).
+#}
+
+{% if project %}
+	<nav class="next-project" aria-label="ניווט בין פרויקטים">
+		<div class="container">
+			<a class="next-project__link" href="{{ project.link }}">
+				<span class="next-project__meta">
+					<span class="next-project__label">הפרויקט הבא</span>
+					<span class="next-project__title"><bdi>{{ project.title }}</bdi></span>
+				</span>
+
+				{# Decorative: the link text already says where this goes. #}
+				<span class="next-project__arrow" aria-hidden="true">←</span>
+			</a>
+		</div>
+	</nav>
+{% endif %}
