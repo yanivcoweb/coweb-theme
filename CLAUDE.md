@@ -14,6 +14,10 @@ preference.
 1. **No hardcoded design values.** Every colour, spacing, radius and font size
    comes from `assets/scss/_variables.scss`. If a value isn't there, it doesn't
    go in the CSS — add the token first.
+   There is exactly one documented exception, `COWEB_THEME_COLOR` in
+   `inc/meta.php`: the `theme-color` meta tag is read before any stylesheet, so
+   it cannot reference a custom property. It duplicates `color/surface/base`.
+   Change one and change the other, or a dark site gets a white status bar.
 2. **Logical properties only.** Never `margin-left`, `padding-right`, `left`,
    `right`, `text-align: right`, or `border-left`. See the RTL section below.
 3. **All content comes from ACF.** No text, image, or link is hardcoded in a
@@ -51,7 +55,8 @@ inc/
   timber.php                   Timber bootstrap + global Twig context
   setup.php                    theme supports, menus, editor constraints
   post-types.php               `work` CPT, `work_tag` taxonomy, filter chips
-  assets.php                   one stylesheet, two scripts, mtime cache-bust
+  assets.php                   one stylesheet, three scripts, mtime cache-bust
+  meta.php                     description, Open Graph, canonical, JSON-LD
   acf-sections.php             every field group, registered in PHP
   contact-form.php             own handler — no form plugin
 templates/
@@ -65,7 +70,8 @@ templates/
     site-header.twig / site-footer.twig
     ui/                        button, section-header, project-card,
                                post-item, pagination, breadcrumbs, tag-chip,
-                               stat-block, form-field, article-toc
+                               stat-block, form-field, article-toc,
+                               next-project, search-form
     sections/                  one file per ACF layout
 assets/scss/
   _functions.scss              rem() and fluid()
@@ -79,6 +85,8 @@ assets/scss/
 assets/js/
   menu.js                      mobile drawer
   toc.js                       article TOC, only enqueued on posts
+  reveal.js                    section reveal on scroll — the one entry on the
+                               behaviour map that needs a script
 ```
 
 Build with `npm run build` (or `npm run dev` to watch). `assets/css/` is
@@ -213,6 +221,25 @@ almost every section reaches for, so it gets the unqualified name and the
 others carry the modifier. If the legacy site's ACF clone field emits
 `container-wide`, that is the seam to check when porting content across.
 
+**Those numbers are content width, and the gutter is added on top of the cap:**
+
+```scss
+max-inline-size: calc(var(--size-container) + 2 * var(--size-gutter));
+```
+
+`box-sizing: border-box` is global, so writing `max-inline-size: 1200px` with
+`padding-inline: 24px` yields 1152px of content and every screen sits 48px
+narrower than Figma draws it. That was the state until 2026-09-01, and the
+article measure was the worse half: `--size-measure` is documented as 760px,
+~65 Hebrew characters, and was rendering at 712.
+
+It hides well. Below the cap `inline-size: 100%` wins and the gutter comes out
+of the viewport either way, so 390 always measured correctly — only viewports
+past the cap disagree, and only by the gutter. The confirmation that the fix is
+right is `article__columns`: at 1200 of content its `space-between` resolves to
+a 180px gap between the 760px body and the 260px TOC, which is Figma's spacing
+to the pixel.
+
 ---
 
 ## Motion
@@ -247,6 +274,18 @@ Rules that are not negotiable:
   either way; reduced motion skips the tween, it does not skip the step.
 - The behaviour map on the `Motion` page is closed. An element that isn't on
   it doesn't animate — that's a decision, not an omission.
+- **Open and close are different rows on that map**, so they cannot share one
+  transition: `menu open` is `base` + `entrance`, `menu close` is `fast` +
+  `exit`. In CSS that means the value lives on the *closed* rule (it plays on
+  the way out) and the `[data-open]` rule carries the entrance. The drawer had
+  one shared `base`/`entrance` transition until 2026-09-01.
+- `section reveal` is the only row needing JavaScript: `opacity` +
+  `translateY(8px)`, `slow`, `entrance`, once per element, 60ms between items
+  in the same row. `assets/js/reveal.js` hides an element *only* after its
+  IntersectionObserver reports it outside the viewport, so nothing on screen is
+  ever hidden and a page whose observer never fires renders fully at rest.
+  Deciding what to hide from `window.innerHeight` instead looks equivalent and
+  is not — any environment reporting a zero height blanks the page.
 
 ---
 
@@ -269,6 +308,48 @@ Rules for section partials:
   order: Twig's `format` filter applies to the format string, not the value.)
 - A missing partial renders `_missing.twig`, which warns logged-in admins
   instead of failing silently. Keep it that way.
+
+---
+
+## The document head
+
+`inc/meta.php`. No SEO plugin — a plugin brings its own admin UI, its own
+storage outside ACF, and front-end markup the theme doesn't control, for a
+handful of tags derived from content that already exists.
+
+Everything is **derived**, for the same reason breadcrumbs are: a per-page "SEO
+title" field drifts away from the heading an editor actually sees, and nobody
+notices for months.
+
+| Tag | Source |
+|---|---|
+| `<title>` | core, via `add_theme_support('title-tag')` |
+| `description` | post excerpt → first section `intro`/`sub`/`text` → post content → archive description → site tagline |
+| `og:*`, `twitter:card` | the same title/description, plus the share image |
+| `canonical` | built from the queried object, on **every** view |
+| `theme-color` | `COWEB_THEME_COLOR` — see the non-negotiables |
+| JSON-LD | `ProfessionalService` on the front page, `BreadcrumbList` wherever the trail has depth, `BlogPosting`/`CreativeWork` on a single |
+
+Four things worth knowing before editing it:
+
+- **Core's `rel_canonical` is removed.** It only covers singular views, so
+  every archive went without one. Ours covers everything — and two canonical
+  links is worse than none, because then the crawler picks.
+- **The canonical is built from the queried object, never `REQUEST_URI`**,
+  which carries whatever tracking parameters the visitor arrived with.
+- **A page's description comes from its first section's intro.** Pages are
+  Flexible Content, so `post_content` is empty and `get_the_excerpt()` returns
+  nothing — the hero intro is the page's own summary, already written, already
+  on screen.
+- **404 and search emit none of it.** A preview card for a dead URL is noise in
+  a share sheet.
+
+Trimming is `mb_*` throughout. `substr` on Hebrew cuts a multi-byte character
+in half and puts a replacement glyph in the description.
+
+The share image falls back to a `share_image` field on the options page, and
+the card type follows it: `summary_large_image` only when there is an image,
+because a large card without one renders as an empty grey box.
 
 ---
 
@@ -302,16 +383,21 @@ That makes the following requirements, not suggestions:
 
 ## Working with the Figma file
 
-Pages in the file:
+Pages in the file — **address them by node ID**:
 
-| Page | Contents |
-|---|---|
-| `Foundations` | 41 variables in 2 modes, 11 text styles, 15 components / 38 variants |
-| `Home / Desktop` | homepage, 1440px |
-| `Inner Pages / Desktop` | nine screens, 1440px |
-| `Mobile / 390` | the same ten screens, 390px |
-| `States & Specs` | focus ring spec, button states, form states, mobile menu open + closed, wired prototype |
-| `Motion` | duration and easing tokens, behaviour map, reduced motion, RTL transform trap |
+| Page | nodeId | Contents |
+|---|---|---|
+| `Foundations` | `0:1` | 41 variables in 2 modes, 11 text styles, 15 components / 38 variants |
+| `Home / Desktop` | `6:2` | homepage, 1440px |
+| `Inner Pages / Desktop` | `13:3` | nine screens, 1440px |
+| `Mobile / 390` | `31:3` | the same ten screens, 390px |
+| `States & Specs` | `24:15` | focus ring spec, button states, form states, mobile menu open + closed, wired prototype |
+| `Motion` | `104:5` | duration and easing tokens, behaviour map, reduced motion, RTL transform trap |
+
+**`get_metadata` with no `nodeId` lists only `Foundations`.** That listing is
+broken, not the file — every page above returns a full subtree when asked for
+directly. A previous session trusted the listing, concluded the screens didn't
+exist, and wrote that into this file as a launch blocker. Don't repeat it.
 
 Components on `Foundations` — every one carries a description naming its partial
 path and ACF mapping, so read it before writing the Twig:
@@ -418,19 +504,147 @@ failed) and now returns to the form's own page even when the request carries no
   It takes a `level` now — the level, not the size; `text-h3` still fixes the size.
 - Four `include` tags had no `with { … } only`. All 26 now do.
 
-**Tablet needs a decision, not a fix.** Nothing is broken between 768 and 1024:
-no overflow, and the `auto-fit` grids reflow 1 → 2 → 3 columns sensibly. The one
-open question is the orphan — three capability cards in a two-column grid leave
-the third alone on row two (on the start edge, which is correct RTL). Whether it
-should span both columns is a design call, and there is no frame to answer it.
+**The grids are pinned to the design's column counts**, not to whatever
+`auto-fit` happens to fit. That distinction was invisible until the screens
+could be read: `auto-fit` derives its count from the track floor, so it matched
+the design only while a section held fewer items than one row. Six capability
+cards came out 4+2 against Figma's 3+3, and six projects came out 3+3 against
+2+2+2. Measured after the change, at 390 / 768 / 1024 / 1440:
 
-**Unverified, and the reason is upstream:** the Figma file behind key
-`QXG17uCfGkmn2XOAfKTAzk` lists exactly one page, `Foundations`, holding the 15
-components. The `Home / Desktop`, `Inner Pages / Desktop`, `Mobile / 390`,
-`States & Specs` and `Motion` pages this file describes are not in it. The
-component library and the whole token layer check out; the screen frames could
-not be compared because there are none to compare against. Confirm whether they
-live in a different file before trusting the screen-level claims below.
+| Grid | 390 | 768 | 1024 | 1440 | Figma |
+|---|---|---|---|---|---|
+| `capabilities-grid` | 1 | 2 | 3 | 3 | 1 / — / 3 |
+| `process-steps` | 1 | 2 | 4 | 4 | 1 / — / 4 |
+| `work-selected` | 1 | 2 | 2 | 2 | 1 / — / 2 |
+| `work-archive` | 1 | 2 | 2 | 2 | 1 / — / 2 |
+| `stat-row` | 2 | 4 | 4 | 4 | 2 / — / 4 |
+
+**Tablet is still undesigned**, and the 768 column is a judgement call — there
+is no frame between 390 and 1440. The orphan question survives in one place
+only: `about` has three principles, so a two-column tablet grid leaves the
+third alone on row two (on the start edge, which is correct RTL). The home
+page's six cards divide evenly and never had the problem.
+
+**All six Figma pages exist.** An earlier session recorded the opposite, and
+that claim was wrong: `get_metadata` called with no `nodeId` returns only
+`0:1: Foundations`, and the absence was read as the file's rather than the
+listing's. Address pages by node ID and they all return full subtrees — see the
+table in the Figma section below.
+
+**Four gaps closed 2026-09-01**, all of them found by reading the screen frames
+against the code. None was visible from the templates alone, and none would
+have been found without the screens:
+
+- **Grid column counts.** See the table above. `auto-fit` agreed with the
+  design only by coincidence.
+- **Section reveal did not exist.** The behaviour map specifies it and
+  `--motion-slow` was defined in `_variables.scss` and referenced nowhere — a
+  token minted for a feature nobody built. Now `assets/js/reveal.js`.
+- **`work-single` had no next-project navigation.** Figma has the frame on both
+  breakpoints. It is derived from the query, not ACF — an authored field would
+  drift the moment a project is inserted between two others — so it lives in
+  `partials/ui/`, beside breadcrumbs and pagination, and `single-work.twig`
+  appends it after `{{ parent() }}` rather than becoming a section.
+- **The mobile drawer was missing its whole bottom block** — CTA, email and
+  phone — and the wordmark from its top bar. This reframes something recorded
+  earlier as fixed: the drawer's `justify-content: space-between` was not a
+  stray rule, it was correct for the three children the design has and wrong
+  for the two that were built. Removing it treated the symptom.
+
+Reading the behaviour map to build the reveal turned up a fifth: the drawer ran
+one shared `base`/`entrance` transition for both directions, where the map gives
+close `fast`/`exit`. Measured after the fix — open `0.2s`, close `0.12s`.
+
+**What the reveal's verification is missing.** The in-app browser pane does not
+run the rendering steps: `requestAnimationFrame` never fires and an
+IntersectionObserver never delivers a report, so nothing observer-driven —
+`reveal.js` or `toc.js` — can be exercised there, and no Chrome extension was
+connected on 2026-09-01. Verified instead: the compiled CSS, that the stagger
+logic picks the right elements and delays against the real rendered column
+count (header 0ms, then cards at 60/120/180ms, restarting each row), and that
+with the observer never firing the page renders fully at rest. **Not** verified:
+that a section actually fades and rises as it scrolls into view. That needs real
+Chrome.
+
+Everything else measured in the pane at 390 / 768 / 1024 / 1440: zero
+horizontal overflow on home, work archive and work single; the next-project
+block puts its label and title on the start edge and the arrow on the end, in
+`#ff7a45` over a `#23272e` rule — both the exact Figma values; the closed
+drawer computes `visibility: hidden` on a clean load, so it stays out of the
+tab order with three more focusables in it.
+
+**The screen-by-screen pass is done.** All ten screens compared against both
+their desktop and mobile frames. Seven more divergences, all of them template
+or PHP rather than CSS polish:
+
+- **Container width was 48px narrow everywhere.** See the Design tokens
+  section — the single largest finding, and the one that had been invisible
+  longest because mobile measures correctly either way.
+- **No category chips on the blog.** Figma draws the same `tag-chip` row on
+  `blog-index` and `blog-category` that `work-index` has. `coweb_post_filters()`
+  now sits beside `coweb_work_filters()` in `inc/post-types.php`; they are one
+  idea and should stay together.
+- **A category archive was headed "בלוג".** `archive.twig` is `index.twig` with
+  a different query, and Timber fills `title` for a post-type archive but not
+  for a category, so every category fell through to index.twig's own default.
+  The category name was in the `<title>` tag the whole time, which is how it
+  survived. `coweb_archive_title()` in `inc/timber.php` now answers for both.
+- **`get_the_archive_title()`'s prefix leaked into the breadcrumbs** — "בית /
+  ארכיונים: עבודות", "בית / קטגוריה: WPML". Dropped once at the source with
+  `get_the_archive_title_prefix`, so every consumer agrees.
+- **The posts index had no breadcrumb at all.** `is_home()` is neither
+  `is_singular()` nor `is_archive()`, so it fell through every branch in
+  `coweb_breadcrumbs()` and came out with a one-entry trail the partial
+  declines to render.
+- **The TOC was hidden below desktop.** Figma puts it full width *above* the
+  article at 390. The aside is now first in the DOM so a single column stacks
+  it correctly and the tab order still matches; the two-column case places both
+  children explicitly. `.article__aside:has([hidden])` collapses it when
+  `toc.js` has fewer than two headings to list, so a short post gets no empty
+  row — measured at zero.
+- **`blog-single` had no cta-band.** Figma closes it with one on both
+  breakpoints. An article has no `sections` field, so the copy comes from a new
+  `article_cta` group on the options page and goes into the existing partial.
+
+**Checked and correct, against an earlier misreading:** `contact` matches on
+both breakpoints. Figma puts the form at x=540..1320 — the *right*, which is
+the start edge in Hebrew — with the details on the left, and stacks the form
+first at 390. That is exactly the DOM order. The frames were read edge-inverted
+the first time; x=0 in a Figma frame is the left, which in RTL is the end.
+
+Measured after all of it, at 390 / 768 / 1024 / 1440: zero horizontal overflow
+and exactly one `<h1>` on home, work index, work single, contact, blog single
+and a category archive; twelve routes returning 200/404 with an empty PHP error
+log; `.container` resolving to 1200px of content and `.container-narrow` to
+760px past the cap.
+
+**Still a deviation, deliberately:** the 404 carries a search field that is not
+in the frame. It is the only entry point to search the site has, so it stays —
+but it should be drawn into Figma rather than left as an undocumented
+difference.
+
+**The head layer landed 2026-09-01** — see the section above. Measured across
+seven routes: exactly one canonical on every indexable view and none on 404 or
+search, Open Graph and `twitter:card` on all five indexable ones, `theme-color`
+everywhere including the 404, and JSON-LD that parses on every route that emits
+it. `COWEB_THEME_COLOR` was checked against the compiled
+`--color-surface-base`; both are `#0b0c0e`.
+
+Two things in the head are **blocked on assets, not code**:
+
+- **No favicon.** This needs no theme code at all — core's `wp_site_icon()`
+  already emits the tags once a square image is uploaded under Settings. It is
+  waiting on the wordmark becoming a real vector, which is the same thing
+  blocking the 26px hardcoded logo size.
+- **No OG image.** The plumbing prefers a post's featured image and falls back
+  to `share_image` on the options page. Neither exists yet, so every share
+  currently renders as a small card with no picture. 1200×630.
+
+One consequence of the derived-description rule worth watching: an archive with
+no term description falls through to the site tagline, so **the tagline is now
+load-bearing** — it is the description for the work index and the blog index.
+It is empty in the rig, which is why those two routes emit no description tag
+at all rather than a wrong one.
 
 Content is placeholder throughout: invented post dates and titles, unverified
 case-study metrics, grey rectangles for every image. Before launch, all of it
