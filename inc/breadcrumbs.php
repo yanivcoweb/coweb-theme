@@ -76,9 +76,20 @@ function coweb_breadcrumbs(): array {
 			'title' => get_the_title( $post_id ),
 			'url'   => null,
 		);
+	} elseif ( is_home() && ! is_front_page() ) {
+		/*
+		 * The posts index is neither singular nor an archive as far as the
+		 * conditional tags are concerned, so it fell through every branch and
+		 * came out with a one-entry trail the partial then declined to render.
+		 * It was the only archive-shaped screen on the site without a trail.
+		 */
+		$crumbs[] = array(
+			'title' => coweb_archive_title(),
+			'url'   => null,
+		);
 	} elseif ( is_archive() ) {
 		$crumbs[] = array(
-			'title' => wp_strip_all_tags( get_the_archive_title() ),
+			'title' => coweb_archive_title(),
 			'url'   => null,
 		);
 	} elseif ( is_search() ) {

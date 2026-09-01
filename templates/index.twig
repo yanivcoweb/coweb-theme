@@ -9,11 +9,34 @@
 		<div class="container post-archive__inner">
 
 			<header class="page-hero">
+				{# Every other archive carries a trail, and Figma uses the same
+				   `page-hero` component here as on work-index. The blog was the
+				   one place it had been left off. #}
+				{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+
 				<h1 class="page-hero__title">{{ title|default('בלוג') }}</h1>
 				{% if description %}
 					<p class="page-hero__intro">{{ description }}</p>
 				{% endif %}
 			</header>
+
+			{# Figma `category-filters` on blog-index and blog-category — the same
+			   chip row work-index has. One category is not a filter, it is a
+			   label, so the row needs at least two to earn its place. #}
+			{% set filters = post_filters() %}
+			{% if filters|length > 1 %}
+				<ul class="tag-list" role="list">
+					{% for filter in filters %}
+						<li>
+							{% include 'partials/ui/tag-chip.twig' with {
+								label: filter.label,
+								url: filter.url,
+								active: filter.active
+							} only %}
+						</li>
+					{% endfor %}
+				</ul>
+			{% endif %}
 
 			{# `posts` is a Timber PostQuery, which extends ArrayObject: Countable,
 			   but an object, so plain `{% if posts %}` is true even when it holds

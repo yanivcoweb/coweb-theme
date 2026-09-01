@@ -717,6 +717,33 @@ add_action(
 							'instructions'  => 'לרוב עמוד העבודות. אם ריק — מוצג רק הכפתור לעמוד הבית.',
 						)
 					),
+					/*
+					 * Figma puts a cta-band at the foot of `blog-single`, but an
+					 * article is not built from sections — there is no ACF row to
+					 * carry it. A group here gives the same three fields the
+					 * cta_band layout has, so single.twig can hand it straight to
+					 * the existing partial without a second template.
+					 */
+					coweb_field(
+						'opt_article_cta',
+						'article_cta',
+						'רצועת סיום בכתבות',
+						'group',
+						array(
+							'instructions' => 'מוצגת בסוף כל פוסט בבלוג. בלי קישור — לא מוצגת כלל.',
+							'sub_fields'   => array(
+								coweb_field( 'opt_article_cta_heading', 'heading', 'כותרת', 'text' ),
+								coweb_field( 'opt_article_cta_sub', 'sub', 'משפט משנה', 'textarea', array( 'rows' => 2 ) ),
+								coweb_field(
+									'opt_article_cta_link',
+									'link',
+									'כפתור',
+									'link',
+									array( 'return_format' => 'array' )
+								),
+							),
+						)
+					),
 				),
 			)
 		);

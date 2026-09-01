@@ -69,6 +69,15 @@ add_action(
 );
 
 /**
+ * WordPress prefixes archive titles — "ארכיונים: עבודות", "קטגוריה: WPML" —
+ * on the assumption the title stands alone as a page heading. Here it never
+ * does: it sits under a breadcrumb that has already said where you are, and
+ * the prefix leaked into the trail itself. Drop it once, at the source, so
+ * every consumer of get_the_archive_title() agrees.
+ */
+add_filter( 'get_the_archive_title_prefix', '__return_empty_string' );
+
+/**
  * Register the ACF options page that holds the header CTA and contact details.
  * Guarded because the theme should degrade, not fatal, if ACF Pro is missing.
  */

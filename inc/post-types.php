@@ -108,10 +108,60 @@ function coweb_work_filters(): array {
 	return $filters;
 }
 
+/**
+ * The same chip row for the blog, built from core categories.
+ *
+ * It lives beside coweb_work_filters() rather than in a blog-specific file
+ * because the two are one idea — Figma draws the same `tag-chip` row on
+ * `work-index`, `blog-index` and `blog-category`, and the day one of them
+ * changes shape the other has to follow.
+ *
+ * @return array<int,array{label:string,url:string,active:bool}>
+ */
+function coweb_post_filters(): array {
+	$terms = get_terms(
+		array(
+			'taxonomy'   => 'category',
+			'hide_empty' => true,
+		)
+	);
+
+	if ( is_wp_error( $terms ) || ! $terms ) {
+		return array();
+	}
+
+	$current = is_category() ? (int) get_queried_object_id() : 0;
+
+	// The posts page if one is assigned, the front page otherwise — a blog
+	// that has not been given its own page still needs somewhere to send
+	// "all".
+	$blog_id  = (int) get_option( 'page_for_posts' );
+	$blog_url = $blog_id ? (string) get_permalink( $blog_id ) : home_url( '/' );
+
+	$filters = array(
+		array(
+			'label'  => 'הכל',
+			'url'    => $blog_url,
+			'active' => 0 === $current,
+		),
+	);
+
+	foreach ( $terms as $term ) {
+		$filters[] = array(
+			'label'  => $term->name,
+			'url'    => (string) get_term_link( $term ),
+			'active' => $term->term_id === $current,
+		);
+	}
+
+	return $filters;
+}
+
 add_filter(
 	'timber/twig/functions',
 	static function ( array $functions ): array {
 		$functions['work_filters'] = array( 'callable' => 'coweb_work_filters' );
+		$functions['post_filters'] = array( 'callable' => 'coweb_post_filters' );
 
 		return $functions;
 	}

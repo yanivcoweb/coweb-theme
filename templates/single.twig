@@ -5,8 +5,9 @@
 	writes free-form HTML, so `.article-body` styles descendants directly
 	rather than expecting BEM classes on prose it doesn't control.
 
-	The TOC sits on the end edge (left in RTL) as a secondary column, and is
-	built by JS from the rendered h2 nodes.
+	The TOC sits on the end edge (left in RTL) as a secondary column at desktop
+	and above the article at mobile, and is built by JS from the rendered h2
+	nodes.
 #}
 
 {% block content %}
@@ -43,16 +44,37 @@
 				</figure>
 			{% endif %}
 
-			<div class="article__columns">
-				<div class="article-body" data-toc-source>
-					{{ post.content }}
-				</div>
+			{#
+				The aside comes first in the DOM on purpose. Figma stacks the TOC
+				*above* the article at 390 and puts it beside it at 1440, and DOM
+				order is what a single-column grid follows — so the two-column
+				case is the one placed explicitly, in _blocks.scss.
 
+				Doing it the other way round and reordering visually on mobile
+				would leave the TOC drawn above the article but tabbed after it.
+			#}
+			<div class="article__columns">
 				<aside class="article__aside">
 					{% include 'partials/ui/article-toc.twig' with {} only %}
 				</aside>
+
+				<div class="article-body" data-toc-source>
+					{{ post.content }}
+				</div>
 			</div>
 
 		</div>
 	</article>
+
+	{#
+		Figma `blog-single` closes with a cta-band on both breakpoints. An
+		article has no `sections` field to carry one, so the copy comes from
+		Site settings and goes into the same partial every section uses.
+		No link, no band.
+	#}
+	{% if options.article_cta.link.url %}
+		{% include 'partials/sections/cta-band.twig' with {
+			section: options.article_cta
+		} only %}
+	{% endif %}
 {% endblock %}

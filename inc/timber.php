@@ -47,6 +47,29 @@ add_action(
 );
 
 /**
+ * The name of the current archive.
+ *
+ * Timber fills `title` for a post-type archive but not for a category or the
+ * posts index, so `archive.twig` — which is only `index.twig` with a different
+ * query — fell through to index.twig's own default and headed every category
+ * with the word "בלוג". The category name was in the <title> tag the whole
+ * time, which is how it went unnoticed.
+ *
+ * is_home() is the one case get_the_archive_title() does not answer at all.
+ *
+ * @return string
+ */
+function coweb_archive_title(): string {
+	if ( is_home() ) {
+		$blog_id = (int) get_option( 'page_for_posts' );
+
+		return $blog_id ? get_the_title( $blog_id ) : 'בלוג';
+	}
+
+	return wp_strip_all_tags( get_the_archive_title() );
+}
+
+/**
  * Values every template needs. Anything page-specific belongs in the template
  * that renders it, not here — this context is built on every request.
  *
@@ -66,6 +89,12 @@ add_filter(
 			: array();
 
 		$context['home_url'] = home_url( '/' );
+
+		// Set for every archive-shaped request, not only the ones Timber
+		// already covers, so index.twig's heading never has to guess.
+		if ( is_home() || is_archive() ) {
+			$context['title'] = coweb_archive_title();
+		}
 
 		return $context;
 	}

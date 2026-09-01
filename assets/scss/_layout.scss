@@ -8,6 +8,17 @@
 // working. Every one is logical-property only — no left, no right.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// The tokens name the width of the *content*, so the gutter is added on top of
+// the cap rather than eaten out of it.
+//
+// `box-sizing: border-box` is global, so `max-inline-size: 1200px` with 24px of
+// padding yields 1152px of content — and every screen sat 48px narrower than
+// Figma draws it. The article measure was the worse half: `--size-measure` is
+// documented as 760px, ~65 Hebrew characters, and rendered at 712.
+//
+// Below the cap nothing changes: `inline-size: 100%` still wins and the gutter
+// still comes out of the viewport, which is why 390 always measured correctly
+// and this went unseen.
 %container-base {
   inline-size: 100%;
   margin-inline: auto;
@@ -17,19 +28,19 @@
 .container-narrow {
   @extend %container-base;
 
-  max-inline-size: var(--size-measure); // 760px — article measure
+  max-inline-size: calc(var(--size-measure) + 2 * var(--size-gutter)); // 760px of content
 }
 
 .container-medium {
   @extend %container-base;
 
-  max-inline-size: 60rem; // 960px
+  max-inline-size: calc(60rem + 2 * var(--size-gutter)); // 960px of content
 }
 
 .container {
   @extend %container-base;
 
-  max-inline-size: var(--size-container); // 1200px
+  max-inline-size: calc(var(--size-container) + 2 * var(--size-gutter)); // 1200px of content
 }
 
 .container-full-width {

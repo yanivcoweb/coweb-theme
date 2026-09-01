@@ -949,15 +949,31 @@
   @include from($bp-desktop) {
     grid-template-columns: minmax(0, #{rem(760)}) #{rem(260)};
     justify-content: space-between;
+
+    // The aside is first in the DOM so that a single column stacks it above
+    // the article, which is how Figma draws blog-single at 390. Two columns
+    // are the exception, so both children are placed by hand: track 1 is the
+    // start edge — the right, in Hebrew — and that is the article.
+    > .article-body {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    > .article__aside {
+      grid-column: 2;
+      grid-row: 1;
+    }
   }
 }
 
-.article__aside {
-  // Below the desktop breakpoint the sticky column would sit above the article
-  // and push the whole body down, so it simply doesn't render there.
+// Until toc.js has something to fill, the nav inside is `hidden` and the aside
+// is an empty grid item — which still costs a row gap above the article. This
+// collapses it, and stops collapsing it the moment the script unhides the nav.
+//
+// An earlier pass solved the same problem by never rendering the aside below
+// desktop at all, on the grounds that it would push the body down. Figma is
+// explicit that it should: at 390 the TOC is full width, above the article,
+// 246px tall. That is the cost of an article aid, and it is the design.
+.article__aside:has([hidden]) {
   display: none;
-
-  @include from($bp-desktop) {
-    display: block;
-  }
 }
