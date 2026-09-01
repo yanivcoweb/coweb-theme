@@ -708,6 +708,16 @@ add_action(
 					),
 					coweb_field( 'opt_linkedin', 'linkedin_url', 'לינקדאין', 'url' ),
 					coweb_field(
+						'opt_share_image',
+						'share_image',
+						'תמונת שיתוף',
+						'image',
+						array(
+							'return_format' => 'array',
+							'instructions'  => 'מוצגת כשמשתפים קישור לאתר בוואטסאפ, בלינקדאין ובסלאק. 1200×630. עמוד עם תמונה ראשית משתמש בה במקום.',
+						)
+					),
+					coweb_field(
 						'opt_404_link',
 						'not_found_link',
 						'קישור משני בעמוד 404',

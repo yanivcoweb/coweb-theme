@@ -29,5 +29,6 @@ require_once COWEB_DIR . '/inc/timber.php';
 require_once COWEB_DIR . '/inc/setup.php';
 require_once COWEB_DIR . '/inc/post-types.php';
 require_once COWEB_DIR . '/inc/assets.php';
+require_once COWEB_DIR . '/inc/meta.php';
 require_once COWEB_DIR . '/inc/acf-sections.php';
 require_once COWEB_DIR . '/inc/contact-form.php';
