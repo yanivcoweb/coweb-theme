@@ -555,16 +555,33 @@ Reading the behaviour map to build the reveal turned up a fifth: the drawer ran
 one shared `base`/`entrance` transition for both directions, where the map gives
 close `fast`/`exit`. Measured after the fix — open `0.2s`, close `0.12s`.
 
-**What the reveal's verification is missing.** The in-app browser pane does not
-run the rendering steps: `requestAnimationFrame` never fires and an
-IntersectionObserver never delivers a report, so nothing observer-driven —
-`reveal.js` or `toc.js` — can be exercised there, and no Chrome extension was
-connected on 2026-09-01. Verified instead: the compiled CSS, that the stagger
-logic picks the right elements and delays against the real rendered column
-count (header 0ms, then cards at 60/120/180ms, restarting each row), and that
-with the observer never firing the page renders fully at rest. **Not** verified:
-that a section actually fades and rises as it scrolls into view. That needs real
-Chrome.
+**The reveal was watched running, 2026-09-08.** Sampled in a visible browser
+pane at 1522×746, scrolling `capabilities-grid` into view:
+
+| t | opacity — header · three cards | translateY |
+|---|---|---|
+| before scroll | `0.00 0.00 0.00 0.00` | `8 8 8 8` |
+| 64ms | `0.57 0.00 0.00 0.00` | `3 8 8 8` |
+| 151ms | `0.85 0.69 0.34 0.00` | `1 2 5 8` |
+| 274ms | `0.99 0.94 0.86 0.70` | `0 0 1 2` |
+| 709ms | `1.00 1.00 1.00 1.00` | `0 0 0 0` |
+
+At 64ms the header is over half in and no card has moved, which is the 60ms
+step; the last card's 180ms delay plus the 320ms `slow` duration lands it
+around 500ms. `translateY` runs 8px → 0 exactly as the map specifies. Scrolling
+past, back to the top and through a second time leaves it at 1.00 — it runs
+once. Above the fold, `hero-main` and `logo-strip` were never marked at all, so
+nothing on screen is hidden for a frame.
+
+**A surface has to be visible to verify any of it.** A hidden browser pane, and
+a Chrome tab in a background window, both report
+`document.visibilityState: "hidden"`, run no rendering steps, fire no
+`requestAnimationFrame` and deliver no IntersectionObserver report — the pane
+also reports a 0×0 viewport. That is one cause, not two, and it applies equally
+to `toc.js`. Computed styles, geometry and DOM assertions read fine either way.
+The fail-safe was seen from both sides: with nothing rendering, nothing is
+hidden that was on screen, and the reveal arrives as soon as the surface is
+shown.
 
 Everything else measured in the pane at 390 / 768 / 1024 / 1440: zero
 horizontal overflow on home, work archive and work single; the next-project
