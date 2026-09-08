@@ -37,7 +37,7 @@ preference.
 | Fields | ACF Pro — Flexible Content |
 | Styles | SCSS, compiled to a single stylesheet |
 | Fonts | IBM Plex Sans Hebrew + IBM Plex Mono (Google Fonts, enqueued) |
-| Local | Flywheel Local |
+| Local | Flywheel Local — `coweb.local`, see Known state |
 | Deploy | Git → Cloudways staging → production |
 
 Not used, deliberately: page builders, Bootstrap/Tailwind, jQuery for new code,
@@ -479,8 +479,9 @@ because the optional second link has no URL in the rig. The focus ring was confi
 
 The contact form round-trips through all four paths (expired / sent / error /
 failed) and now returns to the form's own page even when the request carries no
-`Referer` header. `wp_mail` returns false in the rig, so the valid path lands on
-`failed` — that is the environment, not the theme.
+`Referer` header. `wp_mail` returned false in the SQLite rig, so the valid path
+landed on `failed` there — the environment, not the theme. That gap is closed:
+on `coweb.local` the valid path reaches `sent` and the mail arrives, see below.
 
 **Fixed in that pass**, each one invisible to a template-only reading:
 
@@ -589,6 +590,60 @@ block puts its label and title on the start edge and the arrow on the end, in
 `#ff7a45` over a `#23272e` rule — both the exact Figma values; the closed
 drawer computes `visibility: hidden` on a clean load, so it stays out of the
 tab order with three more focusables in it.
+
+**The dev environment moved, 2026-09-08.** The theme now runs on a Local
+(Flywheel) site at `E:\Local Sites\coweb`, served at `http://coweb.local/`,
+with `wp-content/themes/coweb` a junction back to the repo — the same
+arrangement the disposable SQLite rig used, and the same warning: never delete
+the site folder recursively without removing the link first. The rig still
+exists and is still the fastest surface for a pure template check, but anything
+touching mail, MySQL or real content belongs here now. Seeded by `seed.php` in
+the site root, which is idempotent and **has to run twice on a fresh site**:
+`switch_theme()` does not load the new theme's `functions.php` in the same
+request, so the `work` CPT is not registered yet and its archive menu item is
+silently skipped.
+
+**`wp_mail` works there**, through Mailpit, and that closed the one path the rig
+could never show. All four contact-form paths were confirmed against delivered
+mail: `sent`, `error`, `expired`, and the honeypot answering `sent` while the
+mailbox count stays put.
+
+Which is how the last real bug in that form surfaced. **A malformed email came
+back empty while every other field repopulated** — `sanitize_email()` reduces
+anything invalid to an empty string, and the value was being stored after
+sanitising, so the one field the visitor has to correct was the one that came
+back blank. The handler now keeps what was typed for the form and a separate
+sanitised `$email` for validation, the mail body and `Reply-To`. Confirmed both
+ways: `broken-at-example` returns with all four fields intact, and a valid
+address padded with spaces still sends, trimmed.
+
+**Re-measured on `coweb.local`, 2026-09-08**, ten routes × four widths, zero
+deviations across all forty: no horizontal overflow, one `<h1>` per page, no
+skipped heading levels, no physical `text-align`, no unlabelled image, no empty
+link. `.container` resolves to 1248px (1200 of content plus two 24px gutters);
+the article body is 760px beside a 260px TOC with a 180px gap, Figma's spacing
+to the pixel; the hero `h1` is 64px at 1440 and 38px at 390, the article's 48
+and 30. The closed drawer computes `visibility: hidden` with `translateX(+390)`
+— a positive sign, which is the start edge in RTL and the whole point of the
+`transform` trap — and closes in 0.12s. `next-project` puts its title on the
+start edge and its `#ff7a45` arrow on the end, over a `#23272e` rule.
+
+Two things this pass had to teach:
+
+- **Log out, or hide the admin bar, before measuring.** A signed-in Chrome
+  renders `#wpadminbar`, which adds 32px of height and physical
+  `text-align: right` on eight elements — the first sweep reported a
+  right-alignment "bug" on all ten routes. A visitor never sees it.
+- **The tablet orphan does not appear in the current content.** Six capability
+  cards divide 2+2+2 at 768, four process steps 2+2, and the three blocks on
+  `about` are `text_blocks`, which stack one per row at every width rather than
+  forming a two-column grid. The question stays open for any future section with
+  an odd count.
+
+The section reveal was **not** re-verified in that pass: the Chrome window sat in
+the background, `document.visibilityState` read `hidden`, and nothing rendered —
+so every element read `opacity: 1`, which is the fail-safe behaving correctly
+rather than a result. The run recorded above, earlier the same day, stands.
 
 **The screen-by-screen pass is done.** All ten screens compared against both
 their desktop and mobile frames. Seven more divergences, all of them template

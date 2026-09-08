@@ -92,12 +92,21 @@ function coweb_handle_contact(): void {
 		exit;
 	}
 
+	/*
+	 * The email is kept twice on purpose. sanitize_email() reduces anything
+	 * malformed to an empty string, which is right for sending and wrong for
+	 * repopulating: every other field comes back filled and the one field the
+	 * visitor has to correct comes back blank. $values carries what they typed,
+	 * $email carries the address we are willing to use.
+	 */
 	$values = array(
 		'name'    => isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '',
-		'email'   => isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '',
+		'email'   => isset( $_POST['email'] ) ? sanitize_text_field( wp_unslash( $_POST['email'] ) ) : '',
 		'company' => isset( $_POST['company'] ) ? sanitize_text_field( wp_unslash( $_POST['company'] ) ) : '',
 		'message' => isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '',
 	);
+
+	$email = sanitize_email( $values['email'] );
 
 	$errors = array();
 
@@ -105,7 +114,7 @@ function coweb_handle_contact(): void {
 		$errors['name'] = 'נא למלא שם.';
 	}
 
-	if ( '' === $values['email'] || ! is_email( $values['email'] ) ) {
+	if ( '' === $email || ! is_email( $email ) ) {
 		$errors['email'] = 'נא למלא כתובת אימייל תקינה.';
 	}
 
@@ -136,7 +145,7 @@ function coweb_handle_contact(): void {
 	$body = sprintf(
 		"שם: %s\nאימייל: %s\nחברה: %s\n\n%s",
 		$values['name'],
-		$values['email'],
+		$email,
 		$values['company'] ?: '—',
 		$values['message']
 	);
@@ -149,7 +158,7 @@ function coweb_handle_contact(): void {
 		$body,
 		array(
 			'Content-Type: text/plain; charset=UTF-8',
-			sprintf( 'Reply-To: %s <%s>', $values['name'], $values['email'] ),
+			sprintf( 'Reply-To: %s <%s>', $values['name'], $email ),
 		)
 	);
 
