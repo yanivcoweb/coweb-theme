@@ -642,10 +642,33 @@ Two things this pass had to teach:
   forming a two-column grid. The question stays open for any future section with
   an odd count.
 
-The section reveal was **not** re-verified in that pass: the Chrome window sat in
-the background, `document.visibilityState` read `hidden`, and nothing rendered —
-so every element read `opacity: 1`, which is the fail-safe behaving correctly
-rather than a result. The run recorded above, earlier the same day, stands.
+The section reveal took two attempts, and the first one is the lesson: with the
+Chrome window in the background `document.visibilityState` read `hidden`,
+nothing rendered, and every element came back `opacity: 1` — the fail-safe
+behaving correctly, not a result. Bringing the window to the front and sampling
+per animation frame gives the real thing:
+
+| t | header · first three cards |
+|---|---|
+| before scroll | `0.00/8 0.00/8 0.00/8 0.00/8` |
+| 65ms | `0.47/4 0.00/8 0.00/8 0.00/8` |
+| 205ms | `0.91/1 0.80/2 0.58/3 0.00/8` |
+| 343ms | `1.00/0 0.98/0 0.94/1 0.84/1` |
+| 552ms | all `1.00/0` |
+
+(opacity/translateY in px.) At 65ms the header is nearly half in and no card has
+moved — the 60ms step; the last of them lands around 500ms, which is its 180ms
+delay plus the 320ms `slow` duration. Scrolling past, back to the top and
+through a second time leaves everything at 1.00, so it still runs once.
+`hero-main` and `logo-strip` are never marked, so nothing above the fold is
+hidden for a frame.
+
+One detail worth writing down, because it is easy to mistake for a bug: sampled
+mid-flight the six capability cards read `0.69 0.33 0.00 0.69 0.33 0.00`. The
+stagger is **per row**, not per card — cards 1 and 4 open together because they
+share a column position. That is what "60ms between items in the same row" on
+the behaviour map means, and the first card to arrive is the one on the right,
+which is the start edge.
 
 **The screen-by-screen pass is done.** All ten screens compared against both
 their desktop and mobile frames. Seven more divergences, all of them template
