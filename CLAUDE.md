@@ -597,8 +597,10 @@ with `wp-content/themes/coweb` a junction back to the repo — the same
 arrangement the disposable SQLite rig used, and the same warning: never delete
 the site folder recursively without removing the link first. The rig still
 exists and is still the fastest surface for a pure template check, but anything
-touching mail, MySQL or real content belongs here now. Seeded by `seed.php` in
-the site root, which is idempotent and **has to run twice on a fresh site**:
+touching mail, MySQL or real content belongs here now. Seeded by `seed.php`,
+kept one level above the webroot at `E:\Local Sites\coweb\seed.php` so nothing
+dev-only is ever web-served — it is idempotent, and **has to run twice on a
+fresh site**:
 `switch_theme()` does not load the new theme's `functions.php` in the same
 request, so the `work` CPT is not registered yet and its archive menu item is
 silently skipped.
