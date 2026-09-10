@@ -38,10 +38,56 @@ preference.
 | Styles | SCSS, compiled to a single stylesheet |
 | Fonts | IBM Plex Sans Hebrew + IBM Plex Mono (Google Fonts, enqueued) |
 | Local | Flywheel Local — `coweb.local`, see Known state |
-| Deploy | Git → Cloudways staging → production |
+| Deploy | GitHub Actions → rsync over SSH → Cloudways staging → production |
 
 Not used, deliberately: page builders, Bootstrap/Tailwind, jQuery for new code,
 any plugin that renders front-end markup we don't control.
+
+---
+
+## Deploy
+
+`.github/workflows/deploy.yml`. One `git push` moves the whole theme; there is
+no per-file upload and no FTP client in the loop.
+
+| Trigger | Target |
+|---|---|
+| push to `main` | staging, automatically |
+| Actions → *Deploy theme* → Run workflow | staging or production, on demand |
+
+The build happens in CI, not on the server. `assets/css/` and `vendor/` are
+gitignored — they are never in the repo and are never on the server unless the
+workflow puts them there — so the sync carries compiled CSS and a `--no-dev`
+`vendor/` while `assets/scss/`, `node_modules/` and the tooling manifests are
+excluded. Cloudways needs neither node nor composer installed.
+
+Two guards worth keeping:
+
+- **The workflow fails if `assets/css/main.css` is empty or missing.** That is
+  the one failure mode that would otherwise report green and leave an unstyled
+  site — the CSS is a build artifact, so a broken `sass` run produces no error
+  anywhere downstream.
+- **`rsync --delete` prunes whatever `THEME_PATH` points at.** A wrong path is
+  a destructive deploy, not a failed one. Run once with `dry_run: true` after
+  changing that secret, and read the file list before trusting it. Excluded
+  paths are protected from deletion by rsync (`--delete-excluded` is
+  deliberately not used), so `.git` or an `uploads` symlink inside the theme
+  would survive — but nothing else would.
+
+Secrets are per **environment** (`staging`, `production`), not repo-wide, which
+is what makes the two targets differ and what lets production require a
+reviewer before the job runs:
+
+| Secret | Example |
+|---|---|
+| `SSH_HOST` | the Cloudways server IP |
+| `SSH_USER` | the application SSH user |
+| `SSH_KEY` | the private half of a key added under Cloudways → SSH Keys |
+| `THEME_PATH` | `/home/master/applications/<app>/public_html/wp-content/themes/coweb` |
+
+This deploys the **theme only**. Content, uploads and the database do not move
+— a section added locally needs its ACF rows authored again on the live site,
+because the layout ships in `inc/acf-sections.php` but the content never does.
 
 ---
 

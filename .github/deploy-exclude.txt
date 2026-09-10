@@ -1,0 +1,17 @@
+# Never leaves the repo. Sources, tooling and history — the server runs the
+# compiled output, and anything here is either rebuilt in CI or dev-only.
+.git/
+.github/
+.gitignore
+.gitattributes
+.claude/
+node_modules/
+assets/scss/
+package.json
+package-lock.json
+composer.json
+composer.lock
+CLAUDE.md
+.editorconfig
+*.log
+.env

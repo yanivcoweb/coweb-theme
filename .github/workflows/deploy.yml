@@ -1,0 +1,78 @@
+# One push, whole theme. The build output that lives here is exactly the two
+# things .gitignore keeps out of the repo — assets/css/ and vendor/ — so the
+# server never needs node, sass or composer.
+#
+# staging   push to main, automatically
+# production  Actions → Deploy theme → Run workflow → target: production
+#             (the `production` environment can require a reviewer, which is
+#              what makes "בלחיצה" also mean "בכוונה")
+name: Deploy theme
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Where to deploy
+        type: choice
+        options: [staging, production]
+        default: staging
+      dry_run:
+        description: List what would change, transfer nothing
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-${{ inputs.target || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target || 'staging' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # A missing or empty stylesheet is the one failure that would deploy a
+      # green build onto an unstyled site. Catch it here, not in Chrome.
+      - name: Verify the stylesheet compiled
+        run: test -s assets/css/main.css
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+      - name: Verify Timber is present
+        run: test -f vendor/timber/timber/src/Timber.php
+
+      - name: Open the SSH connection
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      # --delete makes the server match the repo, which is the whole point:
+      # a file deleted here disappears there. It also means THEME_PATH must be
+      # exact — it is the directory rsync is authorised to prune.
+      - name: Sync
+        run: |
+          rsync -rlvz --checksum --delete ${{ inputs.dry_run && '--dry-run' || '' }} \
+            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes" \
+            --exclude-from=.github/deploy-exclude.txt \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.THEME_PATH }}/"
+
+      - name: Say where it went
+        run: echo "→ ${{ inputs.target || 'staging' }} · ${{ secrets.THEME_PATH }}"
