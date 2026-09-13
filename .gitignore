@@ -27,3 +27,6 @@ Thumbs.db
 # with read access to the repo.
 coweb-deploy
 coweb-deploy.pub
+
+# Playwright MCP page snapshots — tool scratch, not project files.
+.playwright-mcp/

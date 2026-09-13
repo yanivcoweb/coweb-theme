@@ -959,9 +959,15 @@
       grid-row: 1;
     }
 
+    // The aside must span the full row height, or the sticky TOC inside it
+    // has nowhere to travel: `align-items: start` on the grid shrinks every
+    // item to its content, and a sticky element cannot leave its parent's
+    // box. Stretching only this item gives the TOC the article's height to
+    // slide along while it holds its inset from the top.
     > .article__aside {
       grid-column: 2;
       grid-row: 1;
+      align-self: stretch;
     }
   }
 }
