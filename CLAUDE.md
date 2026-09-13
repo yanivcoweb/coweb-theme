@@ -85,6 +85,34 @@ reviewer before the job runs:
 | `SSH_KEY` | the private half of a key added under Cloudways → SSH Keys |
 | `THEME_PATH` | `/home/master/applications/<app>/public_html/wp-content/themes/coweb` |
 
+**Staging is live through this pipeline, 2026-09-14.** `test.coweb.co.il` is
+Cloudways application `fdpkfwrsnd` (the panel also shows it as `cowebtest` —
+one folder, two names) on `161.35.213.89`, deployed as the `master_*` server
+user with a dedicated `github-actions` key. Three things the first deploy
+taught:
+
+- **Never derive `THEME_PATH` from a folder that already holds a `coweb`
+  theme.** Two applications on that server did — both are `erl.co.il`, a
+  client site running the old Bootstrap starter of the same name. Pointing
+  `--delete` at either would have erased a client's live theme. Find the app
+  by `server_name` in `applications/<app>/conf/server.nginx`, never by theme
+  folder.
+- **Set path secrets through stdin, not `--body`.** From Git Bash on Windows,
+  `gh secret set --body "/home/..."` has MSYS rewrite the leading `/` into a
+  Windows path; the stored value came back without its slash and rsync
+  failed on `mkdir "/home/master/***"`. `printf '%s' "$path" | gh secret set`
+  is immune. The workflow now refuses any `THEME_PATH` that does not match
+  the Cloudways shape, so this fails before the SSH step.
+- **A dry run proves the connection, not the path.** `--dry-run` creates no
+  directories, so the first dry run passed on the broken value. Read the
+  manifest for what it does show — deletions, and whether `vendor/` and
+  `assets/css/` are in it — and treat the first real run as the path test.
+
+The deploy key pair lives gitignored in the repo root as `coweb-deploy` /
+`coweb-deploy.pub`; the private half is also the `SSH_KEY` secret. Production
+has no environment yet — creating one is the same four secrets against the
+production application's path, plus a required reviewer.
+
 This deploys the **theme only**. Content, uploads and the database do not move
 — a section added locally needs its ACF rows authored again on the live site,
 because the layout ships in `inc/acf-sections.php` but the content never does.
