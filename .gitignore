@@ -21,3 +21,9 @@ Thumbs.db
 .env
 .idea/
 .vscode/
+
+# Deploy key pair, generated locally. The private half goes into a GitHub
+# secret and nowhere else; committing it would hand the server to anyone
+# with read access to the repo.
+coweb-deploy
+coweb-deploy.pub

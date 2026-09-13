@@ -57,6 +57,20 @@ jobs:
       - name: Verify Timber is present
         run: test -f vendor/timber/timber/src/Timber.php
 
+      # THEME_PATH is the one directory rsync --delete is allowed to prune, so
+      # its shape is checked before anything connects. This exists because the
+      # first real deploy failed on a path that had lost its leading slash:
+      # `gh secret set --body "/home/..."` run from Git Bash on Windows has
+      # MSYS rewrite the argument as a Windows path. Set it through stdin.
+      - name: Check THEME_PATH is a Cloudways theme directory
+        env:
+          THEME_PATH: ${{ secrets.THEME_PATH }}
+        run: |
+          case "$THEME_PATH" in
+            /home/master/applications/*/public_html/wp-content/themes/coweb) ;;
+            *) echo "::error::THEME_PATH is not /home/master/applications/<app>/public_html/wp-content/themes/coweb"; exit 1 ;;
+          esac
+
       - name: Open the SSH connection
         run: |
           mkdir -p ~/.ssh
