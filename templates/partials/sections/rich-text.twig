@@ -1,15 +1,23 @@
 {#
 	ACF layout: rich_text — the body of a plain content page, such as the
-	accessibility statement.
+	accessibility statement. Figma `doc-body` (22:175).
 
 	Reuses `.article-body`, so prose written here is styled identically to a
 	blog post body. One set of prose rules, not two.
+
+	The measure is a column inside the 1200 container rather than
+	`.container-narrow`, which centres. Every frame that draws this body — the
+	2026-09 `doc-body` and the first revision's `article-body` before it — puts
+	the 760 at x=560..1320, flush with the *start* edge of the 1200 container
+	and not in the middle of it. Centring was never what the design asked for;
+	it only looked close because a document page has nothing beside the column
+	to measure it against.
 #}
 
 {% if section.content %}
 	<section class="rich-text">
-		<div class="container-narrow">
-			<div class="article-body">{{ section.content|raw }}</div>
+		<div class="container">
+			<div class="article-body rich-text__body">{{ section.content|raw }}</div>
 		</div>
 	</section>
 {% endif %}

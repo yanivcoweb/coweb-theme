@@ -54,16 +54,17 @@
 					<input type="text" id="coweb-website" name="coweb_website" tabindex="-1" autocomplete="off">
 				</div>
 
+				{#
+					Order, labels and placeholders follow the `contact` frame:
+					name, company, email, message. The field *names* are the
+					handler's contract and do not move — only the order they are
+					rendered in.
+				#}
+
 				{% include 'partials/ui/form-field.twig' with {
 					name: 'name', label: 'שם מלא', type: 'text', required: true,
 					placeholder: 'ישראל ישראלי', autocomplete: 'name',
 					value: state.values.name, error: state.errors.name
-				} only %}
-
-				{% include 'partials/ui/form-field.twig' with {
-					name: 'email', label: 'אימייל', type: 'email', required: true,
-					placeholder: 'you@company.com', autocomplete: 'email',
-					value: state.values.email, error: state.errors.email
 				} only %}
 
 				{% include 'partials/ui/form-field.twig' with {
@@ -73,8 +74,22 @@
 				} only %}
 
 				{% include 'partials/ui/form-field.twig' with {
-					name: 'message', label: 'במה אפשר לעזור?', type: 'textarea', required: true,
-					placeholder: 'ספרו בקצרה על הפרויקט, לוחות הזמנים והתקציב.',
+					name: 'email', label: 'אימייל', type: 'email', required: true,
+					placeholder: 'name@company.co.il', autocomplete: 'email',
+					value: state.values.email, error: state.errors.email
+				} only %}
+
+				{#
+					Stays a `textarea`, against the frame. The `form-field`
+					component in this file has no `Type=textarea` variant any
+					more, so every field in the frame is drawn as the one
+					single-line control it has — including this one, whose own
+					placeholder asks for a few sentences. A one-line box for a
+					project brief is the file's limitation, not a decision.
+				#}
+				{% include 'partials/ui/form-field.twig' with {
+					name: 'message', label: 'על מה מדובר?', type: 'textarea', required: true,
+					placeholder: 'ספרו בכמה משפטים על הפרויקט, השפות והלוח זמנים.',
 					value: state.values.message, error: state.errors.message
 				} only %}
 

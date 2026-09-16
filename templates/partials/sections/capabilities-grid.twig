@@ -3,9 +3,13 @@
 
 	The card index is generated from the loop, never authored. An authored
 	number drifts the moment someone reorders rows in ACF.
+
+	With `background_image` the cards lift off the photo (see the
+	`--background` modifier). The 1440 frame draws no scrim here; below
+	desktop one is added, because the crop moves the bright part behind the copy.
 #}
 
-<section class="capabilities-grid">
+<section class="capabilities-grid{% if section.background_image %} capabilities-grid--background{% endif %}">
 	<div class="container capabilities-grid__inner">
 
 		{% include 'partials/ui/section-header.twig' with {
@@ -27,4 +31,11 @@
 		{% endif %}
 
 	</div>
+
+	{# Last child on purpose: reveal.js animates the children of the FIRST child. #}
+	{% include 'partials/ui/section-background.twig' with {
+		image: section.background_image,
+		scrim: 'mobile'
+	} only %}
+
 </section>

@@ -1,0 +1,38 @@
+{#
+	ACF layout: stack_list — Figma `content` (2098:238) on `about`, first drawn
+	as `stack-list` (15:74).
+
+	A `section-header` and a wrapping row of tool names. The chips are text, not
+	links — nothing here filters anything — and they are not the `tag-chip`
+	component: the frame fills them with `surface/raised` and sets them in
+	Mono/Label.
+
+	`role="list"` because the stylesheet removes the markers, and Safari drops
+	list semantics from a list with no visible markers.
+
+	The row starts on the start edge on its own: flex packs to `flex-start`,
+	which is the right under dir="rtl". Each tool is its own item, so a Latin
+	name never reorders the Hebrew around it.
+#}
+
+{% if section.items|length %}
+	<section class="stack-list">
+		<div class="container stack-list__inner">
+
+			{% include 'partials/ui/section-header.twig' with {
+				eyebrow: section.eyebrow,
+				heading: section.heading,
+				intro: section.intro
+			} only %}
+
+			<ul class="stack-list__items" role="list">
+				{% for item in section.items %}
+					{% if item.label %}
+						<li class="stack-list__item">{{ item.label }}</li>
+					{% endif %}
+				{% endfor %}
+			</ul>
+
+		</div>
+	</section>
+{% endif %}

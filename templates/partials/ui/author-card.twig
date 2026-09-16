@@ -1,0 +1,53 @@
+{#
+	The byline at the foot of an article. Figma `author-box` / `author-card` on
+	`blog / single` (21:189), new in the 2026-09 revision.
+
+	Derived, not authored — like `next-project`, `breadcrumbs` and
+	`related-posts` it comes from what the post already knows. WordPress has
+	carried a name, a biography and an avatar for every user since it had
+	users, and they are edited on the profile screen the author already owns.
+	An ACF group repeating them would be a second copy to keep in sync, and the
+	one that goes stale is always the copy.
+
+	DOM order is avatar → text. In the frame the avatar sits at x=672, the
+	right-hand end of the card, which under dir="rtl" is the *start* edge and
+	therefore the first child. Writing the text first would mirror the card.
+
+	The avatar is decorative: the name is the next thing read, so describing
+	the picture as well would say it twice. With avatars switched off in
+	Settings the circle renders empty, exactly as the frame draws it.
+
+	Params:
+	  author  Timber\User — the post's author.
+#}
+
+{% if author %}
+	{% set bio = author.meta('description') %}
+
+	<aside class="author-box">
+		<div class="container author-box__inner">
+			<div class="author-card">
+				<span class="author-card__avatar">
+					{% if author.avatar({ size: 128 }) %}
+						<img
+							src="{{ author.avatar({ size: 128 }) }}"
+							alt=""
+							width="64"
+							height="64"
+							loading="lazy"
+							decoding="async"
+						>
+					{% endif %}
+				</span>
+
+				<div class="author-card__text">
+					<p class="author-card__name"><bdi>{{ author.name }}</bdi></p>
+
+					{% if bio %}
+						<p class="author-card__bio">{{ bio }}</p>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</aside>
+{% endif %}

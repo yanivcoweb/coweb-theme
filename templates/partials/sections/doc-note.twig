@@ -1,0 +1,47 @@
+{#
+	ACF layout: doc_note — Figma `accessibility-contact` (22:196) and the
+	heading directly above it, the pair that closes a document page.
+
+	The heading is a field on this layout rather than the last line an editor
+	types into the `rich_text` above, and that is the whole reason this is a
+	section and not a card floating after the prose. In the frame both live
+	inside one `doc-body` band, 40 apart; in Flexible Content each section owns
+	its own vertical rhythm, so a heading left in the prose section would end up
+	a full band away from the panel it names.
+
+	Named for what it is rather than for the one document that uses it: a
+	labelled contact panel at the end of a legal page is the same object on a
+	terms or a privacy page.
+
+	The surface is `raised-card` — the revision's resting card, not
+	`raised-over-image`: this panel is lifted on a screen with no photo behind
+	it, which is exactly the distinction those two mixins carry.
+#}
+
+{% if section.label or section.text %}
+	<section class="doc-note">
+		<div class="container doc-note__inner">
+
+			{% if section.heading %}
+				<h2 class="doc-note__heading">{{ section.heading }}</h2>
+			{% endif %}
+
+			<div class="doc-note__card">
+
+				{% if section.label %}
+					<p class="doc-note__label">{{ section.label }}</p>
+				{% endif %}
+
+				{% if section.text %}
+					<p class="doc-note__text">{{ section.text }}</p>
+				{% endif %}
+
+				{% if section.note %}
+					<p class="doc-note__note">{{ section.note }}</p>
+				{% endif %}
+
+			</div>
+
+		</div>
+	</section>
+{% endif %}

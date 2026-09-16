@@ -269,6 +269,10 @@
 .hero-main {
   @include section-spacing;
 
+  &--background {
+    @include has-section-background;
+  }
+
   &__inner {
     display: flex;
     flex-direction: column;
@@ -345,6 +349,15 @@
 .capabilities-grid {
   @include section-spacing;
 
+  // Only over a photo. Without one the card is the Foundations component.
+  &--background {
+    @include has-section-background;
+
+    .capability-card {
+      @include raised-over-image;
+    }
+  }
+
   &__inner {
     display: flex;
     flex-direction: column;
@@ -378,6 +391,20 @@
 .process-steps {
   @include section-spacing;
 
+  // Over a photo each step becomes a lifted panel. The frame gives it top
+  // padding only, which leaves the copy flush against the panel's other edges
+  // and clips a descender; the inline and bottom padding here are ours.
+  &--background {
+    @include has-section-background;
+
+    .process-step {
+      padding-inline: var(--space-sm);
+      padding-block-end: var(--space-lg);
+
+      @include raised-over-image;
+    }
+  }
+
   &__inner {
     display: flex;
     flex-direction: column;
@@ -406,7 +433,9 @@
 
 .cta-band {
   padding-block: clamp(#{$space-2xl}, 6vw, #{$space-3xl});
-  background-color: var(--color-brand-ember-dim);
+  background-color: var(--color-surface-raised);
+  // Figma 2026-09 revision: overlay → raised, replacing the flat ember-dim band.
+  background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
 
   &__inner {
     display: flex;
@@ -471,19 +500,40 @@
 .error-page {
   @include section-spacing;
 
+  // Figma 2026-09 revision (`404`, 22:132): the four blocks are one 48px
+  // rhythm, where the old frame ran a 16px gap and hung the buttons off a
+  // margin of their own. The title and body are a pair inside it at 24, so
+  // the sentence does not float 48 away from the heading it explains.
   &__inner {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-md);
+    gap: var(--space-2xl);
     text-align: center;
     padding-block: var(--space-3xl);
   }
 
+  // The one text node in the file that is neither a text style nor bound to a
+  // size token: IBM Plex Mono Bold at 160 with −0.06em tracking. It used to be
+  // a Mono/Label chip. The 1.3 line height is the frame's own box — 208 tall
+  // at 160 — and it is what puts the 48px gap below it where Figma draws it.
   &__code {
-    color: var(--color-text-accent);
+    color: var(--color-brand-ember);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: var(--text-size-error-code);
+    line-height: 1.3;
+    letter-spacing: -0.06em;
+  }
 
-    @include text-mono-label;
+  // Figma caps this pair at 720. `container-narrow` already caps the column at
+  // --size-measure (760), which is the same job at 20px prose and 40px away —
+  // not worth a second measure token that would only ever be read as a typo
+  // for this one.
+  &__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
   }
 
   &__title {
@@ -491,7 +541,6 @@
   }
 
   &__body {
-    max-inline-size: 44ch;
     color: var(--color-text-secondary);
 
     @include text-body-lg;
@@ -501,8 +550,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: var(--space-sm);
-    margin-block-start: var(--space-md);
+    gap: var(--space-md);
   }
 }
 
@@ -521,12 +569,24 @@
     @include text-mono-label;
   }
 
+  // `about` (15:62): the accent label that stands in for the trail.
+  &__eyebrow {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
   &__title {
     @include text-h1;
   }
 
+  // Every frame draws this line as a measured column flush with the start
+  // edge of the container, never the full 1200: 760 on `blog / category`
+  // (22:221), 820 on the other four. `46ch` was neither, and on a 20px Hebrew
+  // body it resolves near 550 — the standfirst wrapped a third earlier than
+  // any frame draws it. `--size-measure` is the 760.
   &__intro {
-    max-inline-size: 46ch;
+    max-inline-size: var(--size-measure);
     color: var(--color-text-secondary);
 
     @include text-body-lg;
@@ -546,14 +606,54 @@
     gap: var(--space-2xl);
   }
 
+  // The count is a caption for the list, not a band of its own — Figma
+  // `result-count` (22:234) leaves 8px between the two. It sits inside this
+  // wrapper rather than beside the list in `__inner`, whose 48 gap is what
+  // separates the featured card, the list and the pager.
+  &__results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  &__count {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
   &__empty {
     color: var(--color-text-muted);
   }
 }
 
-.post-list > li:first-child .post-item {
-  padding-block-start: 0;
+// ─────────────────────────────────────────────────────────────────────────────
+// archive-filters — Figma `category-filters` (2065:222)
+//
+// The chip row above a blog archive's heading. Full bleed, because the rule
+// that closes it runs edge to edge in the frame while the chips themselves
+// stay inside the container.
+//
+// The frame nests this inside `page-hero` at y=29 and leaves 37 between its
+// rule and the eyebrow below. As a sibling the hero's own `section-spacing`
+// would open 96 there instead, so the adjacent-sibling rule pulls it back to
+// 48 — close to the frame, still on the spacing scale, and it needs no
+// modifier threaded through the template to say "I follow the chips".
+// ─────────────────────────────────────────────────────────────────────────────
+
+.archive-filters {
+  padding-block: var(--space-xl);
+  border-block-end: 1px solid var(--color-border-subtle);
+
+  + .page-hero-section {
+    padding-block-start: var(--space-2xl);
+  }
 }
+
+// The first row used to drop its top padding so the list did not open with a
+// gap under the chips. The 2026-09 revision gives every row a `surface/raised`
+// fill, which turns that reset into a visibly shorter first panel — Figma
+// draws all four rows at the same 160. The rows are their own separation now.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // search-form
@@ -596,11 +696,20 @@
   }
 
   // On the 404 the column is centred, so the form takes a measure of its own
-  // rather than stretching the full container and dwarfing the links below it.
+  // rather than stretching the full container and dwarfing the links above it.
+  // 440 is `error-search` (22:152) in the 2026-09 revision, which is the first
+  // frame to draw this field at all — see the note in 404.twig.
   .error-page__inner & {
     inline-size: 100%;
-    max-inline-size: #{rem(420)};
+    max-inline-size: #{rem(440)};
     text-align: start;
+
+    // The one thing the 404's field does not share with a contact control: the
+    // frame gives it the radius/lg corner where a form-field carries radius/sm.
+    // Fill, border, shadow and focus are the same control everywhere else.
+    .search-form__control {
+      border-radius: var(--radius-lg);
+    }
   }
 }
 
@@ -611,41 +720,58 @@
 // descendants directly — there are no BEM classes on prose we don't control.
 // ─────────────────────────────────────────────────────────────────────────────
 
-.article {
-  @include section-spacing;
+// The band above the article. Figma `post-hero` (21:159) — new in the 2026-09
+// revision, which replaced the flat `page-hero` this screen used to share with
+// the archives. It is its own block rather than a `page-hero-section`
+// modifier because almost nothing survived: the photo runs full bleed, the
+// meta line moved below the title, and the padding is the frame's own rather
+// than the section rhythm (72 / 40 against a clamp of 48→96).
+.post-hero {
+  // 72 and 40 in the frame. --space-3xl is 64 and --space-2xl is 48; neither
+  // number is on the scale and neither gap is worth minting a token for, which
+  // is the call `next-project` already made for its own 40.
+  padding-block-start: var(--space-3xl);
+  padding-block-end: var(--space-2xl);
 
-  &__inner {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2xl);
+  &--background {
+    @include has-section-background;
   }
 
-  &__header {
+  &__inner {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
   }
 
-  &__meta {
-    color: var(--color-text-muted);
-
-    @include text-mono-label;
-  }
-
+  // Capped at 940 of the 1200 container, as the frame draws it. A 48px
+  // headline running the full width stops reading as one object.
   &__title {
+    max-inline-size: var(--size-measure-wide);
+
     @include text-h1;
   }
 
-  &__lead {
+  // text/secondary, not the trail's text/muted: the frame separates the two
+  // mono lines by weight of colour, and this one carries the date.
+  &__meta {
     color: var(--color-text-secondary);
 
-    @include text-body-lg;
+    @include text-mono-label;
   }
+}
 
-  &__figure {
-    overflow: hidden;
-    border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-lg);
+.article {
+  @include section-spacing;
+
+  // post-hero owns the gap above: its own bottom padding is the space before
+  // the article, and without this the two paddings stack. Same reason
+  // .work-archive drops its top padding under its hero band.
+  padding-block-start: 0;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
   }
 }
 
@@ -691,17 +817,70 @@
     color: var(--color-text-primary);
   }
 
+  // Figma `code-card` (21:172). The 2026-09 revision gives it the same resting
+  // card surface as every other panel on the page, in place of the flat
+  // overlay fill and hairline it had. `text-code` is what keeps it LTR inside
+  // Hebrew prose — a code block that inherits dir="rtl" reorders its own
+  // punctuation.
+  //
+  // Frame padding is 22 and shadow 0 10 24 −12; --space-lg is 24 and
+  // --shadow-card is 0 12 24 −8. Neither difference is worth a token.
   pre {
     overflow-x: auto;
     padding: var(--space-lg);
-    background-color: var(--color-surface-overlay);
-    border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-md);
+
+    @include raised-card;
+    @include text-code;
+
+    code {
+      font: inherit;
+    }
+  }
+
+  // Figma `callout` (21:184). An aside inside the prose, so it is a class an
+  // editor types rather than an element — the one exception to this block's
+  // "no BEM in content we don't control" rule, and it is a single word.
+  //
+  // The first child is the label line; everything after it is body copy. That
+  // way the markup is two plain paragraphs and there is nothing else to
+  // remember:
+  //
+  //   <div class="callout"><p>חשוב</p><p>…</p></div>
+  .callout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding-block: var(--space-lg);
+    padding-inline: var(--space-lg);
+    color: var(--color-text-primary);
+    background-color: var(--color-brand-ember-dim);
+    border: 1px solid var(--color-border-accent);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-accent);
+
+    > :first-child {
+      color: var(--color-text-accent);
+
+      @include text-mono-label;
+    }
   }
 
   img {
     border-radius: var(--radius-md);
   }
+}
+
+// The article's own prose is Body/Large in the 2026-09 revision — every
+// paragraph in the `blog / single` frame is 20/1.65, where the first revision
+// used it for the lead only.
+//
+// Scoped to `.article` on purpose. `.article-body` is also what `rich-text` and
+// `text_blocks` render into on an ordinary page, and those frames are still
+// Body/Base; unscoping this would resize the accessibility statement along
+// with the blog.
+.article .article-body {
+  @include text-body-lg;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -710,6 +889,12 @@
 
 .page-hero-section {
   @include section-spacing;
+
+  // Only when an editor set a photo. Without one the band is flat, exactly as
+  // it was before backgrounds existed.
+  &--background {
+    @include has-section-background;
+  }
 }
 
 .tag-list {
@@ -750,11 +935,30 @@
     gap: var(--space-sm);
   }
 
+  // Figma 2026-09 revision: the project shot is framed like the project-card
+  // thumbnail rather than outlined with a hairline — the overlay → raised
+  // gradient sits behind it, the border goes to `border/strong`, and a shadow
+  // lifts it off the page. Physical `to right` because a gradient has no
+  // logical direction. `radius/lg` here, not the card's `radius/md`: the frame
+  // draws the larger corner on a 1200-wide shot.
+  //
+  // The frame's own drop shadow is 0 10 24 −8; `--shadow-card` is 0 12 24 −8.
+  // Two pixels of offset is not worth a third shadow token.
+  //
+  // No aspect-ratio. The frame boxes the placeholder at 1200×560 while
+  // labelling it 1200×720, so the box is arbitrary — and a content image
+  // cropped to a fixed ratio loses the top or bottom of a screenshot, which is
+  // exactly the part a case study is pointing at.
   &__figure img {
+    display: block;
     inline-size: 100%;
+    block-size: auto;
     overflow: hidden;
-    border: 1px solid var(--color-border-subtle);
+    background-color: var(--color-surface-raised);
+    background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
   }
 
   &__caption {
@@ -795,42 +999,364 @@
 .media-text {
   @include section-spacing;
 
+  // A band lifted off the page, so the bio reads as its own block between the
+  // photo hero and the lists below. `surface/raised` is the band colour
+  // `work-selected` and `timeline` already use — no new token.
+  background-color: var(--color-surface-raised);
+
+  // Figma `about-row`: two 568 columns in the 1200 container with a 64 gap.
+  // The media column was a fixed 440 against a `1fr` of prose, which made the
+  // portrait a third of the row instead of half of it.
+  //
+  // Side by side, the row stretches, so the image column is exactly as tall
+  // as the prose beside it. Stacked there is nothing to match, so the image
+  // keeps its natural height.
   &__inner {
     display: grid;
-    gap: var(--space-2xl);
+    gap: var(--space-3xl);
     align-items: start;
 
     @include from($bp-tablet) {
-      grid-template-columns: 1fr #{rem(440)};
+      grid-template-columns: 1fr 1fr;
+      align-items: stretch;
     }
   }
 
   // `order` rather than row-reverse: flex and grid already mirror themselves
-  // under dir="rtl", so reversing would reverse twice.
+  // under dir="rtl", so reversing would reverse twice. With two equal columns
+  // only the order has to move now.
   &__inner--media-start {
     @include from($bp-tablet) {
-      grid-template-columns: #{rem(440)} 1fr;
-
       .media-text__media {
         order: -1;
       }
     }
   }
 
+  // Figma 2026-09 revision: the portrait frame is treated like the
+  // `project-card` thumbnail and the `media-full` figure rather than outlined
+  // with a hairline — overlay → raised gradient behind it, `border/strong`, and
+  // a shadow lifting it off the page. Physical `to right`: a gradient has no
+  // logical direction.
+  //
+  // The frame's own drop shadow is 0 12 32 −12 against `--shadow-card`'s
+  // 0 12 24 −8. Same decision as `media-full`: a slightly softer blur is not
+  // worth a third shadow token.
+  //
+  // No aspect-ratio. Side by side the image takes the prose's height instead
+  // (see `__inner`), which means cropping: `object-fit: cover` fills the box,
+  // cropping evenly from both ends. The figure has to be a positioned box of
+  // that height for the image to fill it; absolute keeps the image's own
+  // intrinsic height from pushing the row taller than the text.
+  &__media {
+    @include from($bp-tablet) {
+      position: relative;
+      min-block-size: 100%;
+    }
+  }
+
   &__media img {
+    display: block;
     inline-size: 100%;
+    block-size: auto;
+
+    @include from($bp-tablet) {
+      position: absolute;
+      inset: 0;
+      block-size: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
     overflow: hidden;
-    border: 1px solid var(--color-border-subtle);
+    background-color: var(--color-surface-raised);
+    background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// rich-text
+// stack-list — Figma `stack-list` (15:74)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.stack-list {
+  // Figma `content` (2098:238), 2026-09 revision: 90 / 109 around a
+  // `section-header`. Now that the band opens with its own heading it takes
+  // ordinary section spacing, 96 / 96 at 1440.
+  @include section-spacing;
+
+  // 64 between the header and the chips.
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xl);
+  }
+
+  // Frame gap is 12, `--space-sm`.
+  &__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  // 16 × 8 in the frame, `surface/raised` behind a `border/subtle` stroke at
+  // `radius/md` — the revision dropped the overlay pill for a raised tile.
+  &__item {
+    padding-block: var(--space-xs);
+    padding-inline: var(--space-md);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+
+    @include text-mono-label;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// timeline — Figma `timeline` (15:95)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.timeline {
+  // The 2026-09 frame sets this band on #0f1115, which is no token — it sits
+  // between `surface/base` and `surface/raised`. `raised` is the band colour
+  // `work-selected` already uses; a near-duplicate token is not worth minting.
+  @include section-spacing;
+
+  background-color: var(--color-surface-raised);
+
+  // The frame rules the header off from the first row: 24 below, then a
+  // `border/subtle` line, which is also the top rule of row one.
+  &__header {
+    padding-block-end: var(--space-lg);
+    border-block-end: 1px solid var(--color-border-subtle);
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  // Below tablet the year stacks over the entry as an eyebrow: a 34px column
+  // plus a 32 gap takes a fifth of a 342 measure for four characters. From
+  // tablet it is the frame's row — year on the start edge, entry filling the
+  // rest. No row-reverse: the year is first in the DOM, and flex already puts
+  // the first item on the right under dir="rtl".
+  &__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-block: var(--space-lg);
+    border-block-end: 1px solid var(--color-border-subtle);
+
+    // 32 above and below each row in the frame, from tablet up.
+    @include from($bp-tablet) {
+      padding-block: var(--space-xl);
+    }
+
+    @include from($bp-tablet) {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--space-xl);
+    }
+  }
+
+  // Mono digits are all one width, so four-digit years keep every entry on
+  // the same column without a fixed track.
+  &__year {
+    flex: none;
+    margin: 0;
+    color: var(--color-text-accent);
+    white-space: nowrap;
+
+    @include text-mono-label;
+  }
+
+  &__entry {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  &__title {
+    margin: 0;
+    color: var(--color-text-primary);
+
+    @include text-h3;
+  }
+
+  &__text {
+    margin: 0;
+    color: var(--color-text-secondary);
+
+    @include text-body;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// doc-hero — Figma `page / content` (22:160), the hero frame
+//
+// Not a `page-hero-section` modifier. The frame is still named `page-hero` in
+// the file but it stopped being an instance of the component: accent eyebrow
+// instead of a trail, Display instead of H1, a date line under the title, a
+// full-bleed photo and the ember glow. See `doc-hero.twig`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.doc-hero {
+  // The frame is 96 / 72. `section-spacing` resolves to 96 / 96 at 1440 and
+  // clamps to 48 below, which is the same top and 24px more at the bottom —
+  // against a body band that opens with 48 of its own padding, that difference
+  // is not worth pinning the band to two literal numbers the way `post-hero`
+  // had to for its 72 / 40.
+  @include section-spacing;
+
+  // Figma hangs this hairline on `doc-body` as its `border-top`. Same rule, at
+  // the same y, either way — and putting it on the band that ends rather than
+  // the one that begins keeps `rich_text` free of it, because `rich_text` also
+  // renders on pages that have no document hero above them.
+  border-block-end: 1px solid var(--color-border-subtle);
+
+  &--background {
+    @include has-section-background;
+  }
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  // `text/accent`, where a breadcrumb trail is `text/muted`. That colour is
+  // the whole difference between a label and a one-entry trail.
+  &__eyebrow {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
+  // Display, not H1 — 64 at 1440 against the component's 48. A document page
+  // has no intro paragraph under the title, so the title carries the band.
+  &__title {
+    @include text-display;
+  }
+
+  &__updated {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// rich-text — Figma `doc-body` (22:175)
 // ─────────────────────────────────────────────────────────────────────────────
 
 .rich-text {
   @include section-spacing;
+
+  // The article measure as a column inside the 1200 container, not
+  // `container-narrow`, which centres it. The frame puts the 760 at
+  // x=560..1320 — flush with the start edge of the container. A block narrower
+  // than its containing block sits at the inline-start edge on its own, so
+  // there is nothing to set but the cap.
+  &__body {
+    max-inline-size: var(--size-measure);
+  }
+}
+
+// `doc-bullet` (22:178 and its four siblings): an accent hyphen on the start
+// edge instead of a disc, 12px from the text.
+//
+// Scoped to `.rich-text` deliberately, in the same spirit as the
+// `.article .article-body` rule above. `.article-body` is shared prose — the
+// blog article and `text_blocks` render into it too — and the hyphen is drawn
+// only on the document screen.
+//
+// `list-style-type` with a string rather than `list-style: none` and a
+// `::before`: removing the list style removes the list *semantics* in Safari's
+// screen reader, and an editor writing prose in a wysiwyg has no way to put
+// `role="list"` back. A browser too old for a string marker falls back to the
+// disc, which is a marker in the wrong shape rather than a list that is no
+// longer a list.
+.rich-text .article-body {
+  ul {
+    padding-inline-start: var(--space-sm);
+    list-style-type: "-";
+
+    li::marker {
+      color: var(--color-text-accent);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// doc-note — Figma `accessibility-contact` (22:196)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.doc-note {
+  // The prose band above already closed with its own bottom padding, and this
+  // pair is the tail of the same document. Dropping the top padding here is
+  // the same move `.article` makes under `post-hero` — a structural
+  // relationship, not a sibling rule that moves when rows are reordered.
+  //
+  // The bottom padding is what stands in for the frame's empty `doc-tail`
+  // spacer (22:200).
+  @include section-spacing;
+
+  padding-block-start: 0;
+
+  // Both children cap at the article measure and, being block boxes narrower
+  // than the container, sit at its start edge on their own — the same column
+  // the prose above them runs in.
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  &__heading {
+    max-inline-size: var(--size-measure);
+
+    @include text-h2;
+  }
+
+  &__card {
+    max-inline-size: var(--size-measure);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+
+    @include raised-card;
+  }
+
+  &__label {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
+  &__text {
+    color: var(--color-text-primary);
+
+    @include text-body;
+  }
+
+  &__note {
+    color: var(--color-text-secondary);
+
+    @include text-small;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -840,20 +1366,53 @@
 .contact-block {
   @include section-spacing;
 
+  // Figma `contact-row`: two equal 564 columns in the 1200 container. The
+  // details column was a fixed 300 against a `1fr` of form, which made it a
+  // quarter of the row instead of half — and it is a panel now, so the
+  // narrow column also squeezed four labelled values into a strip.
+  //
+  // The frame's gap is 72; `--space-3xl` is 64 and there is no token between
+  // it and `--space-4xl`. Eight pixels is not worth breaking the spacing
+  // scale for — and it is a *row* gap, so it only applies once the two
+  // columns exist. Stacked, the panel and the form keep the section's
+  // ordinary `--space-2xl`; 64px of empty space between them on a phone is a
+  // desktop measurement applied where nothing asked for it.
   &__inner {
     display: grid;
     gap: var(--space-2xl);
     align-items: start;
 
     @include from($bp-tablet) {
-      grid-template-columns: 1fr #{rem(300)};
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3xl);
     }
   }
 
+  // Figma 2026-09 revision: the bare column of label/value pairs becomes a
+  // panel — the same overlay → raised gradient, `border/strong` and `radius/lg`
+  // the project-card thumbnail and the media figures took. Written out rather
+  // than reusing `raised-over-image`, for the same reason project-card is:
+  // this is the component's own resting state on every screen, not a lift it
+  // takes only over a photo.
+  //
+  // The frame's drop shadow is 0 12 32 −10 against `--shadow-card`'s
+  // 0 12 24 −8. Same call as `media-full` and `media-text` — a slightly softer
+  // blur does not earn a third shadow token.
+  //
+  // Physical `to right`: a gradient has no logical direction.
+  //
+  // `align-items: start` on the grid keeps the panel the height of its own
+  // content, as the frame draws it — it does not stretch to the form's height.
   &__details {
     display: flex;
     flex-direction: column;
     gap: var(--space-xl);
+    padding: var(--space-xl);
+    background-color: var(--color-surface-raised);
+    background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
   }
 }
 
@@ -914,6 +1473,11 @@
 .work-archive {
   @include section-spacing;
 
+  // The page-hero is its own full-bleed band above this one now — Figma runs
+  // the photo edge to edge behind it — and that band's own bottom padding is
+  // the gap to the filter row. Without this the two paddings stack.
+  padding-block-start: 0;
+
   &__inner {
     display: flex;
     flex-direction: column;
@@ -948,7 +1512,15 @@
 
   @include from($bp-desktop) {
     grid-template-columns: minmax(0, #{rem(760)}) #{rem(260)};
-    justify-content: space-between;
+
+    // `start`, not `space-between`. The first revision hung the TOC off the end
+    // edge and the 1200 container resolved the gap to Figma's 180 exactly; the
+    // 2026-09 `article-row` (30:220) is an auto-layout with a 72 gap, which
+    // pulls the TOC in beside the article and leaves 108 of slack at the end.
+    // --space-3xl is 64 and there is no token between it and --space-4xl, so
+    // the slack comes out at 116 instead. The article column does not move.
+    justify-content: start;
+    column-gap: var(--space-3xl);
 
     // The aside is first in the DOM so that a single column stacks it above
     // the article, which is how Figma draws blog-single at 390. Two columns
@@ -980,6 +1552,12 @@
 // desktop at all, on the grounds that it would push the body down. Figma is
 // explicit that it should: at 390 the TOC is full width, above the article,
 // 246px tall. That is the cost of an article aid, and it is the design.
-.article__aside:has([hidden]) {
+//
+// Matched on `[data-toc][hidden]`, not on any hidden descendant. The share row
+// added in the 2026-09 revision ships its "copy link" button hidden and only
+// reveals it once toc.js has found a clipboard — a bare `:has([hidden])` reads
+// that as "the TOC is empty" and deletes the whole column on every browser
+// without clipboard support.
+.article__aside:has([data-toc][hidden]) {
   display: none;
 }

@@ -59,6 +59,31 @@
 
 	toc.hidden = false;
 
+	// Share row, new with the 2026-09 revision. The LinkedIn entry is an
+	// ordinary link and needs nothing from here; "copy link" cannot degrade to
+	// one, so it ships hidden and is revealed only once there is a clipboard to
+	// write to. A button that silently does nothing is worse than no button.
+	var copy = toc.querySelector("[data-copy-link]");
+
+	if (copy && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+		copy.hidden = false;
+
+		copy.addEventListener("click", function () {
+			navigator.clipboard.writeText(window.location.href).then(function () {
+				var original = copy.textContent;
+
+				// aria-live would announce the label twice — once as the
+				// button's new name, once as the region's content. Swapping the
+				// name is the announcement.
+				copy.textContent = copy.getAttribute("data-copied-label") || original;
+
+				window.setTimeout(function () {
+					copy.textContent = original;
+				}, 2000);
+			});
+		});
+	}
+
 	if (!("IntersectionObserver" in window)) {
 		return;
 	}

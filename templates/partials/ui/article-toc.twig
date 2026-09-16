@@ -1,5 +1,5 @@
 {#
-	Maps to the Figma `article-toc` component.
+	Maps to the Figma `article-toc` component (30:206).
 
 	Ships empty and hidden. assets/js/toc.js fills it from the rendered h2
 	nodes and unhides it — so with no JavaScript there is no empty widget,
@@ -7,9 +7,57 @@
 
 	The active marker sits on the start edge, which is the right in RTL:
 	border-inline-start, never border-left.
+
+	The 2026-09 revision adds `toc-share` as a child of this component, so the
+	share row lives and dies with the list: a post with fewer than two h2s
+	renders neither, and `.article__aside:has([hidden])` still collapses the
+	whole column. That is the composition the file draws, and it keeps one rule
+	deciding whether the aside exists rather than two.
+
+	`data-toc` and `hidden` moved onto a wrapper so the nav's accessible name
+	still covers the list and nothing else — toc.js and the collapse rule both
+	key off the root, so neither changed.
+
+	Params:
+	  post  Timber\Post — the article being read, for the share URL.
 #}
 
-<nav class="article-toc" data-toc hidden aria-labelledby="toc-heading">
-	<p class="article-toc__heading" id="toc-heading">בעמוד הזה</p>
-	<ul class="article-toc__list" data-toc-list></ul>
-</nav>
+<div class="article-toc" data-toc hidden>
+	<nav class="article-toc__nav" aria-labelledby="toc-heading">
+		<p class="article-toc__heading" id="toc-heading">בעמוד הזה</p>
+		<ul class="article-toc__list" data-toc-list></ul>
+	</nav>
+
+	<div class="article-toc__share">
+		<p class="article-toc__share-label" id="toc-share-label">שיתוף</p>
+
+		<ul class="article-toc__share-links" role="list" aria-labelledby="toc-share-label">
+			{#
+				First in the DOM, so it lands on the start edge — the right —
+				which is where the frame draws it.
+
+				Hidden until toc.js has confirmed a clipboard to write to. A
+				button that silently does nothing is worse than no button, and
+				this one cannot degrade to a link: there is nothing to link to.
+			#}
+			<li>
+				<button
+					class="article-toc__share-link"
+					type="button"
+					data-copy-link
+					data-copied-label="הקישור הועתק"
+					hidden
+				>העתקת קישור</button>
+			</li>
+
+			<li>
+				<a
+					class="article-toc__share-link"
+					href="https://www.linkedin.com/sharing/share-offsite/?url={{ post.link|url_encode }}"
+					target="_blank"
+					rel="noopener"
+				>LinkedIn</a>
+			</li>
+		</ul>
+	</div>
+</div>

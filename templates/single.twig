@@ -1,9 +1,32 @@
 {% extends "base.twig" %}
 
 {#
-	Article page. The body is the only place in the theme where the editor
-	writes free-form HTML, so `.article-body` styles descendants directly
-	rather than expecting BEM classes on prose it doesn't control.
+	Article page. Figma `blog / single` (21:148).
+
+	The 2026-09 revision rebuilt the top of this screen and added two blocks to
+	the bottom of it:
+
+	  post-hero      a full-bleed band with a photo behind it, the trail above
+	                 the title and date · reading time below it. It replaces the
+	                 flat `page-hero` the first revision drew here.
+	  author-box     new — the byline, derived from the post's WordPress author.
+	  related-posts  new — derived from the query, not authored.
+
+	One band of the frame is deliberately not here. `post-visual` is an empty
+	`image-placeholder` labelled "תמונת כותרת" — the featured image — drawn as
+	its own 1200-wide figure under the hero. In WordPress a post has exactly
+	one featured image, and the hero band above already carries it full bleed,
+	so building both would print the same photograph twice inside 400px. The
+	picture appears once, where the frame's *filled* layer puts it.
+
+	The lead paragraph went with the old header for the same kind of reason:
+	the frame has none, and the body's opening paragraph is Body/Large in this
+	revision, which is the job the lead was doing. The excerpt still feeds the
+	meta description and both index cards.
+
+	The body is the only place in the theme where the editor writes free-form
+	HTML, so `.article-body` styles descendants directly rather than expecting
+	BEM classes on prose it doesn't control.
 
 	The TOC sits on the end edge (left in RTL) as a secondary column at desktop
 	and above the article at mobile, and is built by JS from the rendered h2
@@ -11,38 +34,64 @@
 #}
 
 {% block content %}
+
+	{#
+		The photo behind the header is the post's own featured image.
+
+		An archive takes its hero photo from the options page because a query
+		has no row to carry one; a post is not a query — it already owns
+		exactly one picture, and every post in the blog has one. A site-wide
+		option would put the same photograph behind every article forever,
+		which is the opposite of what a revision that exists to add
+		photography is asking for.
+
+		`section-background.twig` reads an ACF image array, so a Timber image
+		is mapped onto that shape here rather than teaching the partial a
+		second input. `scrim: deep` is the frame's own rgba(11,12,14,0.6), and
+		`eager` because this band is the page's LCP candidate.
+	#}
+	{% set hero_background = post.thumbnail ? {
+		url: post.thumbnail.src,
+		ID: post.thumbnail.id,
+		width: post.thumbnail.width,
+		height: post.thumbnail.height
+	} : null %}
+
+	<section class="post-hero{% if hero_background %} post-hero--background{% endif %}">
+		<div class="container post-hero__inner">
+			{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+
+			<h1 class="post-hero__title"><bdi>{{ post.title }}</bdi></h1>
+
+			{#
+				Date · reading time, below the title — the frame moved it there
+				from above it, and swapped the category for the reading
+				estimate. The category has not gone anywhere: it is the third
+				entry in the trail directly above.
+
+				Reading time is derived from the rendered content. An authored
+				field would be wrong the first time someone edits a paragraph.
+			#}
+			{# `1 דקות` is not Hebrew. One minute is a different noun form, not
+			   the same noun with a different number in front of it. #}
+			{% set minutes = reading_time(post.id) %}
+
+			<p class="post-hero__meta">
+				<time datetime="{{ post.date('c') }}">{{ post.date('d.m.Y') }}</time>
+				· {{ minutes == 1 ? 'דקת קריאה' : minutes ~ ' דקות קריאה' }}
+			</p>
+		</div>
+
+		{# Last child on purpose: reveal.js animates the children of the FIRST child. #}
+		{% include 'partials/ui/section-background.twig' with {
+			image: hero_background,
+			scrim: 'deep',
+			eager: true
+		} only %}
+	</section>
+
 	<article class="article">
 		<div class="container article__inner">
-
-			<header class="article__header">
-				{% include 'partials/ui/breadcrumbs.twig' with {} only %}
-
-				<p class="article__meta">
-					<time datetime="{{ post.date('c') }}">{{ post.date('d.m.Y') }}</time>
-					{% set category = post.terms('category')|first %}
-					{% if category %} · {{ category.title }}{% endif %}
-				</p>
-
-				<h1 class="article__title"><bdi>{{ post.title }}</bdi></h1>
-
-				{% if post.excerpt %}
-					<p class="article__lead"><bdi>{{ post.excerpt }}</bdi></p>
-				{% endif %}
-			</header>
-
-			{% if post.thumbnail %}
-				<figure class="article__figure">
-					<img
-						src="{{ post.thumbnail.src('large') }}"
-						srcset="{{ post.thumbnail.srcset }}"
-						sizes="(min-width: 75rem) 1200px, 100vw"
-						alt="{{ post.thumbnail.alt }}"
-						width="{{ post.thumbnail.width }}"
-						height="{{ post.thumbnail.height }}"
-						decoding="async"
-					>
-				</figure>
-			{% endif %}
 
 			{#
 				The aside comes first in the DOM on purpose. Figma stacks the TOC
@@ -55,7 +104,7 @@
 			#}
 			<div class="article__columns">
 				<aside class="article__aside">
-					{% include 'partials/ui/article-toc.twig' with {} only %}
+					{% include 'partials/ui/article-toc.twig' with { post: post } only %}
 				</aside>
 
 				<div class="article-body" data-toc-source>
@@ -66,11 +115,22 @@
 		</div>
 	</article>
 
+	{% include 'partials/ui/author-card.twig' with { author: post.author } only %}
+
+	{% include 'partials/ui/related-posts.twig' with {
+		posts: related_posts(post.id)
+	} only %}
+
 	{#
-		Figma `blog-single` closes with a cta-band on both breakpoints. An
-		article has no `sections` field to carry one, so the copy comes from
-		Site settings and goes into the same partial every section uses.
-		No link, no band.
+		Kept against the frame, and recorded rather than silent: `blog / single`
+		closed with a cta-band in the first revision and the 2026-09 one drops
+		it for the author box and the related row. Those two are navigation and
+		attribution — neither of them asks for the work. An article is the one
+		screen a stranger lands on from a search result, and without this band
+		it offers no way to get in touch at all.
+
+		It is opt-in either way: no `article_cta` link on the options page, no
+		band.
 	#}
 	{% if options.article_cta.link.url %}
 		{% include 'partials/sections/cta-band.twig' with {

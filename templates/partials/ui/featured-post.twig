@@ -1,0 +1,63 @@
+{#
+	The lead article on the posts index. Figma `featured-post` / `featured-card`
+	on `blog / index` (21:107).
+
+	Derived, not authored. Like `next-project`, `breadcrumbs` and `pagination`
+	this comes from the query: the featured post is simply the newest one, and
+	`index.twig` drops it from the list below so it is never shown twice. An
+	authored "featured post" field would drift the moment something newer is
+	published, and the drift would be silent — the index would keep promoting
+	last spring's article with nobody noticing.
+
+	`מומלץ` is a fixed label on derived navigation, in the same class as
+	`הפרויקט הבא` in `next-project` — it names the slot, it is not content an
+	editor chose.
+
+	DOM order is text → media, the opposite of `post-item`. In Figma the canvas
+	is LTR, so the image sits first (x=32, the left) and the body second
+	(x=620, the right); under dir="rtl" the *first* child lands on the right,
+	so the body has to come first to end up where the frame draws it. It also
+	puts the title ahead of a decorative-by-position image in the reading order.
+	Both files are correct — don't "fix" one to match the other.
+
+	Params:
+	  post  Timber\Post — the article to promote.
+#}
+
+{% if post %}
+	<article class="featured-post">
+
+		<div class="featured-post__body">
+			<p class="featured-post__meta">
+				מומלץ · <time datetime="{{ post.date('c') }}">{{ post.date('d.m.Y') }}</time>
+			</p>
+
+			{# h2: the page's h1 is the archive heading in the hero above. #}
+			<h2 class="featured-post__title">
+				<a class="featured-post__link" href="{{ post.link }}"><bdi>{{ post.title }}</bdi></a>
+			</h2>
+
+			{% if post.excerpt %}
+				<p class="featured-post__excerpt"><bdi>{{ post.excerpt }}</bdi></p>
+			{% endif %}
+		</div>
+
+		{# No thumbnail, no frame. Half a card of empty gradient is worse than a
+		   body that uses the full width. #}
+		{% if post.thumbnail %}
+			{# No width/height. `.width` and `.height` are the *full* attachment's,
+			   not the `large` file's, so the pair would describe a different
+			   picture than the one in `src` — and the box is already fixed by the
+			   container's aspect-ratio, so there is nothing for them to reserve. #}
+			<div class="featured-post__media">
+				<img
+					src="{{ post.thumbnail.src('large') }}"
+					alt="{{ post.thumbnail.alt|default(post.title) }}"
+					loading="lazy"
+					decoding="async"
+				>
+			</div>
+		{% endif %}
+
+	</article>
+{% endif %}

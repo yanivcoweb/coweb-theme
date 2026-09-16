@@ -1,7 +1,8 @@
+@use "sass:color";
 @use "functions" as *;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Design tokens — generated from the Figma file `CoWeb — Redesign 2026`.
+// Design tokens — generated from the Figma file `CoWeb — Redesign 2026 (Copy)`, key 5x6drQcEQ2Rbdk7RvXDZhj.
 //
 // Two forms of every token. Prefer the CSS custom property in rules; reach for
 // the SCSS variable only inside a media query or calc() where Sass needs a
@@ -58,7 +59,48 @@ $radius-full: 999px;
 // ── Sizing ───────────────────────────────────────────────────────────────────
 $size-container: rem(1200);
 $size-measure: rem(760); // article measure, ~65 Hebrew characters
+// Headline measure. `blog / single` caps its h1 at 940 inside the 1200
+// container rather than letting a headline run the full width — at 48px that
+// is about 40 Hebrew characters, which is where a title stops scanning as one
+// object. Not the same thing as $size-measure, which is a *reading* measure
+// for 17–20px prose.
+$size-measure-wide: rem(940);
 $size-gutter: clamp(#{rem(20)}, 2vw, #{rem(24)});
+
+// ── Imagery ──────────────────────────────────────────────────────────────────
+// The layers Figma draws between a section's background photo and its copy.
+// Scrims are color/surface/base at the frame's own opacity: 55% under the
+// hero, 60% under an inner page's page-hero, 65% under process-steps. They are
+// what keeps copy on a photo at AA. Ordered: medium < deep < strong.
+$color-scrim-medium: color.change($color-surface-base, $alpha: 0.55);
+$color-scrim-deep: color.change($color-surface-base, $alpha: 0.6);
+$color-scrim-strong: color.change($color-surface-base, $alpha: 0.65);
+
+// The hero glow: brand/ember at 15% on a layer at 90% opacity, folded into one
+// stop so the element needs no opacity of its own.
+$color-glow-ember: color.change($color-brand-ember, $alpha: 0.135);
+$color-glow-ember-clear: color.change($color-brand-ember, $alpha: 0);
+$size-glow: rem(600);
+
+// Lifts a card off a photo — Figma drop shadow 0 10 12, black at 25%.
+$shadow-raised: 0 rem(10) rem(12) rgba(0, 0, 0, 0.25);
+
+// The project-card thumbnail's own shadow — Figma 0 12 24 −8, black at 25%.
+// Deeper and tighter than $shadow-raised, and it is on the component itself,
+// not only over a photo, so the two are separate tokens rather than one.
+$shadow-card: 0 rem(12) rem(24) rem(-8) rgba(0, 0, 0, 0.25);
+
+// The form-field control's own shadow — Figma 0 4 12 −4, black at 10%. Not a
+// near-miss of $shadow-card but a different job: a control sits *in* the page
+// rather than on top of it, so the offset is a third and the opacity under
+// half. Rounding it to $shadow-card would put a card's lift on an input.
+$shadow-input: 0 rem(4) rem(12) rem(-4) rgba(0, 0, 0, 0.1);
+
+// The article callout's shadow — Figma 0 8 20 −10, brand/ember at 15%. The one
+// shadow in the file that is not black: a callout is ember-bordered on an
+// ember-dim fill, and a black shadow under it reads as dirt rather than lift.
+// That is why it is a token of its own and not a near-miss of $shadow-card.
+$shadow-accent: 0 rem(8) rem(20) rem(-10) color.change($color-brand-ember, $alpha: 0.15);
 
 // ── Type: family ─────────────────────────────────────────────────────────────
 $font-sans: "IBM Plex Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -77,6 +119,15 @@ $text-size-mono: fluid(12, 13);
 // UI/Nav and Mono/Code do not scale — they are deliberately unbound in Figma.
 $text-size-nav: rem(16);
 $text-size-code: rem(14);
+
+// The `404` numeral. The 2026-09 revision blows it up from a Mono/Label chip
+// to a display object, and draws it as a raw text node — 160px literal, not
+// bound to `text/size/*`, so it does not re-render in the Mobile mode and the
+// file offers no second number. The 1440 end is the frame's; the 390 end is a
+// judgement call. 160px mono does fit a 390 viewport (three glyphs at 0.6em
+// less the −0.06em tracking is ~260 of 350), but beside a 30px h1 it stops
+// reading as a number and starts reading as a texture.
+$text-size-error-code: fluid(96, 160);
 
 // ── Motion ───────────────────────────────────────────────────────────────────
 $motion-instant: 0ms;
@@ -134,7 +185,19 @@ $bp-desktop: 64rem; // 1024px
 
   --size-container: #{$size-container};
   --size-measure: #{$size-measure};
+  --size-measure-wide: #{$size-measure-wide};
   --size-gutter: #{$size-gutter};
+
+  --color-scrim-medium: #{$color-scrim-medium};
+  --color-scrim-deep: #{$color-scrim-deep};
+  --color-scrim-strong: #{$color-scrim-strong};
+  --color-glow-ember: #{$color-glow-ember};
+  --color-glow-ember-clear: #{$color-glow-ember-clear};
+  --size-glow: #{$size-glow};
+  --shadow-raised: #{$shadow-raised};
+  --shadow-card: #{$shadow-card};
+  --shadow-input: #{$shadow-input};
+  --shadow-accent: #{$shadow-accent};
 
   --font-sans: #{$font-sans};
   --font-mono: #{$font-mono};
@@ -149,6 +212,7 @@ $bp-desktop: 64rem; // 1024px
   --text-size-mono: #{$text-size-mono};
   --text-size-nav: #{$text-size-nav};
   --text-size-code: #{$text-size-code};
+  --text-size-error-code: #{$text-size-error-code};
 
   --motion-instant: #{$motion-instant};
   --motion-fast: #{$motion-fast};

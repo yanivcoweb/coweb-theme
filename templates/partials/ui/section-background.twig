@@ -1,0 +1,43 @@
+{#
+	Section background — a decorative photo laid under a section's content,
+	plus the scrim (and optionally the ember glow) the Figma frames draw over it.
+
+	Params:
+	  image  ACF image array (`background_image`, return format array). Empty
+	         renders nothing at all, so a section without one looks exactly
+	         as it did before backgrounds existed.
+	  scrim  none | medium | deep | strong — color/surface/base at 55% / 60% / 65%.
+	         The scrim is what keeps the copy on top at AA contrast; pick the
+	         one the frame draws, never `none` under body text.
+	  glow   true for the hero's radial ember glow on the start edge.
+	  eager  true only for a section that can be the LCP element (the hero):
+	         loads eagerly with fetchpriority=high. Everything else is lazy.
+
+	The host section needs its own `--background` modifier carrying the
+	`has-section-background` mixin — position, isolation and clipping live
+	there, because only the host knows it has a layer underneath.
+
+	Decorative by definition: alt="" and aria-hidden. Anything meaningful in a
+	picture belongs in a content image with real alt text, not here.
+#}
+
+{% if image.url %}
+	{% set srcset = function('wp_get_attachment_image_srcset', image.ID, 'full') %}
+	{% set scrim = scrim|default('none') %}
+
+	<div class="section-background{% if scrim != 'none' %} section-background--scrim-{{ scrim }}{% endif %}" aria-hidden="true">
+		<img
+			class="section-background__image"
+			src="{{ image.url }}"
+			{% if srcset %}srcset="{{ srcset }}" sizes="100vw"{% endif %}
+			width="{{ image.width }}"
+			height="{{ image.height }}"
+			alt=""
+			{% if eager %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+			decoding="async"
+		>
+		{% if glow %}
+			<div class="section-background__glow"></div>
+		{% endif %}
+	</div>
+{% endif %}

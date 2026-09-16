@@ -88,6 +88,28 @@ function coweb_breadcrumbs(): array {
 			'url'   => null,
 		);
 	} elseif ( is_archive() ) {
+		/*
+		 * A category or tag archive hangs off the blog, not off the home page
+		 * — the `blog / category` eyebrow (22:219) reads "בלוג / קטגוריה", and
+		 * a single post in that same category already gets the posts page in
+		 * its own trail above. Without this the two disagreed: "בית / בלוג /
+		 * רב־לשוניות / <title>" on the article and "בית / רב־לשוניות" on the
+		 * archive it links back to.
+		 *
+		 * Only for the two core post taxonomies. A `work_tag` archive belongs
+		 * under the work index, and a date archive under neither.
+		 */
+		if ( is_category() || is_tag() ) {
+			$blog_id = (int) get_option( 'page_for_posts' );
+
+			if ( $blog_id ) {
+				$crumbs[] = array(
+					'title' => get_the_title( $blog_id ),
+					'url'   => get_permalink( $blog_id ),
+				);
+			}
+		}
+
 		$crumbs[] = array(
 			'title' => coweb_archive_title(),
 			'url'   => null,

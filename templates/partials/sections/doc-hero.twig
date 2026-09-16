@@ -1,0 +1,45 @@
+{#
+	ACF layout: doc_hero — the hero band of Figma `page / content` (22:160).
+
+	A naming collision worth stating once: the frame in that screen is still
+	*called* `page-hero`, but it is a plain frame, not an instance of the
+	`page-hero` component the other inner screens use. Almost nothing survived
+	the 2026-09 revision — the breadcrumb trail became an accent eyebrow, the
+	H1 became Display, a last-updated line arrived under the title, the photo
+	runs full bleed, and it carries the ember glow the component never had.
+	That is the same call `post-hero` made on `blog / single`: when a screen's
+	hero stops sharing anything with the component, it becomes its own block
+	rather than four conditionals inside `page_hero`. `doc-hero` because
+	`page-hero` is taken by the component that is still in use elsewhere.
+
+	The eyebrow is `text/accent`; the trail elsewhere is `text/muted`. That is
+	what says it is a label — "מסמכים" — and not a one-entry breadcrumb.
+
+	The scrim is the frame's own 55%, the same `medium` the home hero takes.
+	`eager`, because this band is the page's LCP candidate.
+#}
+
+<section class="doc-hero{% if section.background_image %} doc-hero--background{% endif %}">
+	<div class="container doc-hero__inner">
+
+		{% if section.eyebrow %}
+			<p class="doc-hero__eyebrow">{{ section.eyebrow }}</p>
+		{% endif %}
+
+		<h1 class="doc-hero__title">{{ section.title }}</h1>
+
+		{% if section.updated %}
+			<p class="doc-hero__updated">{{ section.updated }}</p>
+		{% endif %}
+
+	</div>
+
+	{# Last child on purpose: reveal.js animates the children of the FIRST child. #}
+	{% include 'partials/ui/section-background.twig' with {
+		image: section.background_image,
+		scrim: 'medium',
+		glow: true,
+		eager: true
+	} only %}
+
+</section>

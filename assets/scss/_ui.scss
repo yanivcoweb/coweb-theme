@@ -211,14 +211,22 @@
   gap: var(--space-sm);
   block-size: 100%;
 
+  // The 2026-09 revision lifts the tile off the page: the flat overlay fill
+  // becomes the same overlay → raised gradient the cards over a photo use, the
+  // border goes to `border/strong`, and a shadow separates it from the
+  // background. Unlike `raised-over-image` this is the component's own resting
+  // state, on every screen, which is why it is written out rather than reusing
+  // that mixin — and why it carries its own shadow token.
   &__thumbnail {
-    aspect-ratio: 16 / 9;
+    // Figma: 588 × 300 in the two-up row.
+    aspect-ratio: 49 / 25;
     margin-block-end: var(--space-xs);
     overflow: hidden;
-    background-color: var(--color-surface-overlay);
-    border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-lg);
-    transition: border-color var(--motion-fast) var(--ease-standard);
+    background-color: var(--color-surface-raised);
+    background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
 
     img {
       inline-size: 100%;
@@ -270,8 +278,12 @@
     @include text-body;
   }
 
-  &:hover &__thumbnail {
-    border-color: var(--color-border-strong);
+  // The thumbnail's resting border is `border/strong` now, so the old
+  // subtle → strong hover had nothing left to say. The affordance moves to the
+  // title, which is the same underline `next-project` uses — and nothing moves,
+  // because the behaviour map has no row for a card hover.
+  &:hover &__title {
+    text-decoration: underline;
   }
 }
 
@@ -279,13 +291,31 @@
 // post-item — Figma `post-item`
 // ─────────────────────────────────────────────────────────────────────────────
 
+// The 2026-09 revision lifts the *row*, not the thumbnail. Where `project-card`
+// took the overlay → raised gradient on its picture, `post-item` keeps its
+// thumbnail exactly as it was — `surface/overlay`, `border/subtle`,
+// `radius/md` — and puts a `surface/raised` fill, a `border/strong` rule and a
+// soft shadow on the row itself. Compared node by node against the old file:
+// the thumbnail is byte-identical between the two revisions.
+//
+// The frame's shadow is 0 4 6 black-10%; `--shadow-input` is 0 4 12 −4 at the
+// same offset and the same opacity. Same decision as `media-full` and
+// `media-text`: a blur that differs by a few pixels is not worth a fourth
+// shadow token.
+//
+// The rows are contiguous — no gap between list items — so each row's shadow
+// is painted over by the next row's fill and only the last one is visible.
+// That is the intent: one raised slab divided by rules, not five floating
+// cards.
 .post-item {
   position: relative;
   display: flex;
   align-items: flex-start;
   gap: var(--space-lg);
   padding-block: var(--space-lg);
-  border-block-end: 1px solid var(--color-border-subtle);
+  background-color: var(--color-surface-raised);
+  border-block-end: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-input);
 
   &__thumbnail {
     flex: 0 0 auto;
@@ -358,6 +388,121 @@
 
   &:hover &__thumbnail {
     border-color: var(--color-border-strong);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// featured-post — Figma `featured-card` on `blog / index` (21:108)
+//
+// The lead article on the posts index, new in the 2026-09 revision. It is the
+// revision's card treatment at full size: overlay → raised gradient,
+// `border/strong`, `radius/lg`, `--shadow-card`. Written out rather than
+// reusing `raised-over-image`, for the same reason `project-card` is — this is
+// the component's own resting state, not a lift it takes only over a photo.
+//
+// The frame's shadow is 0 12 32 −12 against `--shadow-card`'s 0 12 24 −8, the
+// same few pixels of blur `media-text` decided were not worth a token.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.featured-post {
+  position: relative;
+  display: flex;
+  align-items: center;
+  // Figma's gap is 40, exactly between `--space-xl` (32) and `--space-2xl`
+  // (48). The card's own padding is 32, so matching it keeps one rhythm
+  // inside the card rather than two.
+  gap: var(--space-xl);
+  padding: var(--space-xl);
+  background-color: var(--color-surface-raised);
+  background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+
+  // Two 548 columns at 1440. There is no frame between 390 and 1440; below
+  // tablet the picture would be too narrow to read anything in, so the card
+  // stacks. Text stays first — a phone should get the headline, not a
+  // half-screen of photograph above it.
+  @include below($bp-tablet) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  &__body {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--space-sm);
+
+    // A long unbroken token (a URL, a slug) otherwise refuses to shrink and
+    // pushes the picture out of the card.
+    min-inline-size: 0;
+  }
+
+  // The one meta line on the page in `text/accent` rather than `text/muted`:
+  // it is the label that says this row is the promoted one.
+  &__meta {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    @include text-h2;
+  }
+
+  &__link {
+    color: var(--color-text-primary);
+    text-decoration: none;
+
+    // Covers the whole card, so the picture is part of the same target and
+    // there is still exactly one tab stop.
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        outline: 2px solid var(--color-text-primary);
+        outline-offset: -2px;
+        border-radius: var(--radius-lg);
+      }
+    }
+  }
+
+  &__excerpt {
+    color: var(--color-text-secondary);
+
+    @include text-body;
+  }
+
+  // Figma 548 × 280. An aspect-ratio here and not on `media-full`, because
+  // this picture has to fill a fixed half of a card rather than set its own
+  // height in a column of prose.
+  &__media {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    aspect-ratio: 137 / 70;
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+
+    img {
+      display: block;
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+    }
+  }
+
+  // Same affordance as `project-card`: the title underlines, nothing moves.
+  // The behaviour map has no row for a card hover.
+  &:hover &__title {
+    text-decoration: underline;
   }
 }
 
@@ -536,14 +681,20 @@
     color: var(--color-feedback-error);
   }
 
+  // Figma 2026-09 revision: the control's fill moves up a step, from
+  // `surface/raised` to `surface/overlay`, and takes a soft shadow. Same
+  // direction as every other surface in the revision — the field reads as
+  // sitting on the page rather than cut into it. The border, the radius and
+  // the focus behaviour are unchanged.
   &__control {
     inline-size: 100%;
     padding-block: var(--space-md);
     padding-inline: var(--space-md);
     color: var(--color-text-primary);
-    background-color: var(--color-surface-raised);
+    background-color: var(--color-surface-overlay);
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-input);
     transition: border-color var(--motion-fast) var(--ease-standard);
 
     @include text-body;
@@ -556,10 +707,13 @@
     // interactive element. Changing the border here too would make the form
     // the one place with its own focus language.
 
+    // Drops back below the page — the shadow goes with the fill, so a disabled
+    // field is flatter as well as darker. Two signals, not one.
     &:disabled {
       color: var(--color-text-muted);
       background-color: var(--color-surface-base);
       border-color: var(--color-border-subtle);
+      box-shadow: none;
     }
 
     &--textarea {
@@ -609,12 +763,67 @@
     display: none;
   }
 
+  // Figma 2026-09 revision: the head gains the resting card surface the rest of
+  // the page took — the overlay → raised gradient, `--shadow-card`, and a rule
+  // that goes from `border/subtle` to `border/strong`. Written out rather than
+  // reusing `raised-card`, because the frame draws the border on the block end
+  // only and that mixin sets all four sides.
+  //
+  // No inline padding, so the label sits flush with the column edge while the
+  // items below are inset by their marker. That is the frame, not an omission.
   &__heading {
     padding-block-end: var(--space-sm);
     color: var(--color-text-muted);
-    border-block-end: 1px solid var(--color-border-subtle);
+    background-color: var(--color-surface-raised);
+    background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
+    border-block-end: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
 
     @include text-mono-label;
+  }
+
+  // Figma `toc-share`, new in the 2026-09 revision. Inside the component, so
+  // it is hidden with the list on a post too short to have one — see the
+  // partial.
+  &__share {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-block-start: var(--space-lg);
+  }
+
+  &__share-label {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__share-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+
+  // A button and a link side by side, so the button is stripped back to the
+  // link's own shape rather than inheriting anything from `.button`.
+  &__share-link {
+    padding: 0;
+    color: var(--color-text-accent);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+
+    @include text-small;
+
+    &[hidden] {
+      display: none;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   &__link {
@@ -719,5 +928,241 @@
     [dir="ltr"] & {
       transform: scaleX(-1);
     }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// section-background — `partials/ui/section-background.twig`
+//
+// A decorative photo under a section. The host carries the
+// `has-section-background` mixin; this layer only fills it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.section-background {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  &__image {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    max-inline-size: none;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  &--scrim-medium::after {
+    background-color: var(--color-scrim-medium);
+  }
+
+  // 60% is what the 1440 crop of a page-hero photo needs. Below desktop the
+  // same picture is cropped to a much narrower window, which pulls its brightest
+  // area in behind the h1 — half a step more there. There is no 390 frame that
+  // says so; it is the same judgement `--scrim-mobile` makes.
+  &--scrim-deep::after {
+    background-color: var(--color-scrim-deep);
+
+    @include below($bp-desktop) {
+      background-color: var(--color-scrim-strong);
+    }
+  }
+
+  &--scrim-strong::after {
+    background-color: var(--color-scrim-strong);
+  }
+
+  // No scrim where the frame draws none (1440), but a narrow viewport crops
+  // the photo differently and can put its bright part behind the copy.
+  &--scrim-mobile::after {
+    @include below($bp-desktop) {
+      background-color: var(--color-scrim-medium);
+    }
+  }
+
+  // Above the scrim, as in the frame. Start edge: the right, in Hebrew.
+  &__glow {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: calc(var(--size-glow) / -5);
+    inset-inline-start: calc(var(--size-glow) / -5);
+    inline-size: var(--size-glow);
+    block-size: var(--size-glow);
+    background-image: radial-gradient(closest-side, var(--color-glow-ember), var(--color-glow-ember-clear));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// author-box — Figma `author-box` / `author-card` on `blog / single` (21:189)
+//
+// New in the 2026-09 revision. Derived furniture at the foot of an article, in
+// the same family as `next-project` at the foot of a case study: a full-bleed
+// band whose card is pinned to the article measure, so the byline lines up
+// with the column the reader has just finished.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.author-box {
+  // 24 / 40 in the frame; --space-2xl is 48, and 40 is not on the scale. Same
+  // call `next-project` and `post-hero` make.
+  padding-block-start: var(--space-lg);
+  padding-block-end: var(--space-2xl);
+
+  // The card sits at the start edge — the right, in Hebrew — at the article's
+  // own width, not the container's. `align-items: start` is what pins it
+  // there without a margin that would have to be flipped by hand.
+  &__inner {
+    display: flex;
+    align-items: start;
+  }
+}
+
+.author-card {
+  display: flex;
+  align-items: center;
+  // Frame gap is 20, between --space-md and --space-lg. The card's padding is
+  // 24, so matching it keeps one rhythm inside the card.
+  gap: var(--space-lg);
+  inline-size: 100%;
+  max-inline-size: var(--size-measure);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+
+  @include raised-card;
+
+  // Decorative. Empty when avatars are switched off in Settings, which is
+  // exactly how the frame draws it — an unfilled `surface/overlay` circle.
+  &__avatar {
+    flex: 0 0 auto;
+    overflow: hidden;
+    inline-size: #{rem(64)};
+    block-size: #{rem(64)};
+    background-color: var(--color-surface-overlay);
+    border-radius: var(--radius-full);
+
+    img {
+      display: block;
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--space-2xs);
+
+    // A long unbroken token otherwise refuses to shrink and pushes the avatar
+    // out of the card.
+    min-inline-size: 0;
+  }
+
+  // A <p>, not a heading: this is attribution, not a section of the document,
+  // and an h2 here would sit between the article's h2s and the related row's.
+  &__name {
+    @include text-h3;
+  }
+
+  &__bio {
+    color: var(--color-text-secondary);
+
+    @include text-small;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// related-posts — Figma `related-posts` (21:195)
+//
+// Also new in the 2026-09 revision, and derived: see
+// templates/partials/ui/related-posts.twig.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.related-posts {
+  padding-block-start: var(--space-2xl);
+  padding-block-end: var(--space-4xl);
+  border-block-start: 1px solid var(--color-border-subtle);
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  // The one label on the page in text/accent rather than text/muted, the same
+  // way `featured-post` marks its promoted row.
+  &__label {
+    color: var(--color-text-accent);
+
+    @include text-mono-label;
+  }
+
+  // Pinned to the design's column count, never `auto-fit` — see the grid table
+  // in CLAUDE.md. Three cards do not divide by two, so the tablet step goes
+  // straight from one column to three rather than stranding the third on a row
+  // of its own; at 768 that is a 224px card, which a 22px h3 still fits.
+  &__row {
+    display: grid;
+    gap: var(--space-lg);
+
+    @include from($bp-tablet) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}
+
+.related-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+
+  @include raised-card;
+
+  &__meta {
+    color: var(--color-text-muted);
+
+    @include text-mono-label;
+  }
+
+  &__title {
+    @include text-h3;
+  }
+
+  &__link {
+    color: var(--color-text-primary);
+    text-decoration: none;
+
+    // Covers the whole card, so there is one target and one tab stop.
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        outline: 2px solid var(--color-text-primary);
+        outline-offset: -2px;
+        border-radius: var(--radius-md);
+      }
+    }
+  }
+
+  // Same affordance as project-card and featured-post: the title underlines
+  // and nothing moves. The behaviour map has no row for a card hover.
+  &:hover &__title {
+    text-decoration: underline;
   }
 }

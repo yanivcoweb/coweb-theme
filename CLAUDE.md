@@ -2,7 +2,9 @@
 
 Custom WordPress theme for coweb.co.il. Hebrew-only, RTL, dark UI.
 Built with Timber/Twig + ACF Flexible Content. Design source of truth is the
-Figma file `CoWeb — Redesign 2026` (key `QXG17uCfGkmn2XOAfKTAzk`).
+Figma file `CoWeb — Redesign 2026 (Copy)` (key `5x6drQcEQ2Rbdk7RvXDZhj`), the revision
+that added photography and section background images. It replaced the original
+`CoWeb — Redesign 2026` (key `QXG17uCfGkmn2XOAfKTAzk`) as source of truth on 2026-09-15.
 
 ---
 
@@ -286,6 +288,12 @@ to the `Mobile` mode re-renders the whole type ramp with no per-node overrides.
 scale. Keep it that way: a hardcoded size in a text style silently breaks the
 mode, and the mock stops predicting the CSS.
 
+A hero standfirst is a measured column, not the full container. Every frame
+draws `page-hero`'s intro flush with the start edge at 760 (`blog / category`)
+or 820 (the other four) of the 1200. It was `46ch`, which on a 20px Hebrew body
+resolves near 550 — the line wrapped a third earlier than any frame draws it.
+It is `--size-measure` now.
+
 Containers match the existing CoWeb convention so the ACF clone field keeps
 working: `.container-narrow` (760px, article measure), `.container-medium`,
 `.container` (1200px, the default), `.container-full-width`.
@@ -310,9 +318,16 @@ article measure was the worse half: `--size-measure` is documented as 760px,
 It hides well. Below the cap `inline-size: 100%` wins and the gutter comes out
 of the viewport either way, so 390 always measured correctly — only viewports
 past the cap disagree, and only by the gutter. The confirmation that the fix is
-right is `article__columns`: at 1200 of content its `space-between` resolves to
-a 180px gap between the 760px body and the 260px TOC, which is Figma's spacing
+right was `article__columns`: at 1200 of content its `space-between` resolved to
+a 180px gap between the 760px body and the 260px TOC, which was Figma's spacing
 to the pixel.
+
+That evidence has since been spent, not withdrawn. The 2026-09 revision's
+`article-row` is an auto-layout with a 72 gap, so the TOC moved in beside the
+article and 108px of slack now falls at the end edge; `article__columns` is
+`justify-content: start` with a `--space-3xl` column gap. The 1200 and the 760
+are unchanged — only the space between them moved — so the container fix still
+stands, it just no longer proves itself here.
 
 ---
 
@@ -382,6 +397,35 @@ Rules for section partials:
   order: Twig's `format` filter applies to the format string, not the value.)
 - A missing partial renders `_missing.twig`, which warns logged-in admins
   instead of failing silently. Keep it that way.
+- **Background photos use one pattern everywhere.** A section with a photo
+  behind it in Figma gets `coweb_background_image_field( '<prefix>' )` (ACF
+  name `background_image`, array return) as its first sub-field; a
+  `<block>--background` modifier carrying the `has-section-background` mixin,
+  added only when the field is set; and
+  `partials/ui/section-background.twig` with `image`, `scrim`
+  (`none|medium|deep|strong|mobile`), `glow` and `eager` — included as the
+  **last** child of `<section>`, because `reveal.js` animates the children of
+  the section's *first* child. No image means no markup and no modifier, so
+  the section renders as it did before. **An archive has no section row to
+  put the field in** — the work index and the blog index are queries, not
+  pages — so those pass a name to the same helper and register it on the
+  options page instead (`work_archive_background_image`,
+  `blog_archive_background_image`, one per archive); the partial, the
+  scrim and the modifier are unchanged. A card sitting on the photo takes the
+  `raised-over-image` mixin inside that modifier, never on the base component
+  — the Foundations components are still flat.
+  **A component the revision lifts on *every* screen is a different thing** and
+  takes `raised-card` instead: the same overlay → raised gradient with
+  `border/strong` and `--shadow-card` rather than `--shadow-raised`. The first
+  four users of it (`project-card`, `media-full`, `media-text`, the contact
+  panel) still write the four declarations out inline because the mixin did not
+  exist yet; anything new uses the mixin. Do not reach for `raised-over-image`
+  to get a resting card — the shadow is wrong and the border is only a colour
+  change, so it needs a `border-width` from somewhere else.
+  Images are content: the seeder
+  imports them from `E:\Local Sites\coweb\seed-media\` with
+  `coweb_seed_image( $file, $alt )`, keyed by filename so a re-run never
+  duplicates an attachment.
 
 ---
 
@@ -508,10 +552,34 @@ When implementing from Figma:
 
 ## Known state
 
-**The theme is built and compiles.** Thirteen section layouts, every one with a
+**The theme is built and compiles.** Seventeen section layouts, every one with a
 matching partial and block — the naming chain is unbroken end to end. Every
 screen has a template behind it: home, work index and single, about, contact,
 blog index/single/category, a generic content page, and 404.
+
+**`stack_list` and `timeline` are the last two `about` bands**, Figma
+`stack-list` (15:74) and `timeline` (15:95), seeded straight after
+`media_text` in the frame's order. Both drop their top padding like
+`doc-note` — the frame draws every band under the `about` hero with bottom
+padding only. What is not obvious from the markup:
+
+- **The stack chips are not `tag-chip`.** They are plain frames in the file,
+  filled `surface/overlay` and set in Mono/Label, so they are
+  `.stack-list__item` — text in a `role="list"` `<ul>`, never links. The label
+  over them is the section's `<h2>`, drawn at label size.
+- **The timeline's year is authored; its heading level is generated.** The
+  frame draws no heading, so `heading` is optional and visually hidden: set,
+  entry titles are `<h3>`; empty, they become `<h2>`. The seeded
+  `ציר זמן` is the one line in either row that is not Figma copy.
+- **The year sits on the start edge because it is first in the DOM**, not
+  through `order` or `row-reverse`. Below 768 it stacks over the entry as an
+  eyebrow; from 768 it is the frame's row. No width is reserved for it —
+  Mono digits are one width, so four-digit years keep every title on one
+  column, and a range like `2016–2018` would push only its own row.
+- **Neither animates beyond the ordinary section reveal.** The behaviour map
+  has no timeline row. The `<ol>` is a plain block, not a grid, deliberately: `reveal.js`
+  staggers the children of a *grid* by column, which would have made a
+  one-column list alternate 60/120ms.
 
 Search results are `search.php` + `templates/search.twig`, and the field
 itself is `partials/ui/search-form.twig` — it appears on the results page and
@@ -527,6 +595,56 @@ empty blog.
 object, so `{% if posts %}` is true even when it holds nothing. Test
 `posts|length` — every empty state in the theme was unreachable until this was
 found.
+
+**`archive.twig` extends `index.twig`**, so one file renders the posts index,
+every category, every tag and every date archive. Anything the `blog / index`
+frame has and `blog / category` does not — the hero photo, the featured card —
+has to be gated on `is_home()` rather than simply written into the markup, and
+`is_home` and `is_paged` are in the Twig allow-list in `inc/timber.php` for
+exactly that. The featured card is the newest post, promoted out of the list so
+it is never shown twice, and it is off past page one, where `posts|first` is no
+longer the newest article. Derived, like breadcrumbs and `next-project`: an
+authored "featured post" field goes stale the moment something newer is
+published, and nothing says so.
+
+Reading `blog / category` (22:207) against it settled the gate and added three
+things:
+
+- **The category archive has no photo.** Its `hero-bg` (2010:385) is a flat
+  `surface/base` fill where every other hero in the revision carries an image
+  fill, so the `is_home()` gate on the photo is right as written.
+- **The chip row moved into the hero band.** Figma `category-filters`
+  (2065:222) sits above the eyebrow, full bleed, closed by a `border/subtle`
+  rule — not down beside the list, which is where the work index keeps its own
+  (`work-filters`, 13:19, a separate band *below* its hero; don't move that
+  one). It renders on the posts index too, where the frame drops it entirely,
+  for the reason it always did: `post-item` prints its category as text, so
+  chips are the only way into a category archive. `.archive-filters` is its own
+  section rather than a child of the hero because the rule runs edge to edge
+  and because `reveal.js` animates the children of a section's *first* child —
+  folding it in would have taken the heading out of that set. The 37 the frame
+  leaves under the rule comes from `.archive-filters + .page-hero-section`
+  rather than a modifier the template has to remember to pass.
+- **`result-count` (22:234)** is drawn on the category archive and nowhere
+  else, so it is gated the other way — `not is_home()`. It reads
+  `posts.found_posts`, the size of the query rather than of the page, so page
+  two still says how many the category holds.
+
+**Every archive shipped its heading alone.** `index.twig` has always rendered
+`{% if description %}` and nothing ever filled it, so the Body/Large standfirst
+both blog frames draw (21:106, 22:221) was missing on all of them.
+`coweb_archive_description()` in `inc/timber.php` answers for term archives from
+the term's own description — core already stores one, and an authored "archive
+intro" would be a second place to write the same sentence. A post-type archive
+has no equivalent field, so `work / index` and the posts index still come back
+empty rather than getting one invented for them; both frames draw an intro, and
+that is the gap left.
+
+A category's trail now goes through the blog: `coweb_breadcrumbs()` inserts
+`page_for_posts` ahead of a `category` or `tag` term, which is what the eyebrow
+(22:219) reads and what a single post in that same category had all along. A
+`work_tag` archive belongs under the work index and a date archive under
+neither, so neither is included.
 
 **It has been looked at.** 2026-08-31, in real Chrome, at 390 / 768 / 1024 /
 1440. This is the thing the previous two sessions could not do — the in-app
@@ -698,7 +816,8 @@ deviations across all forty: no horizontal overflow, one `<h1>` per page, no
 skipped heading levels, no physical `text-align`, no unlabelled image, no empty
 link. `.container` resolves to 1248px (1200 of content plus two 24px gutters);
 the article body is 760px beside a 260px TOC with a 180px gap, Figma's spacing
-to the pixel; the hero `h1` is 64px at 1440 and 38px at 390, the article's 48
+to the pixel at the time — the 2026-09 revision moved that gap to 72, see the
+Design tokens section; the hero `h1` is 64px at 1440 and 38px at 390, the article's 48
 and 30. The closed drawer computes `visibility: hidden` with `translateX(+390)`
 — a positive sign, which is the start edge in RTL and the whole point of the
 `transform` trap — and closes in 0.12s. `next-project` puts its title on the
@@ -789,10 +908,62 @@ and a category archive; twelve routes returning 200/404 with an empty PHP error
 log; `.container` resolving to 1200px of content and `.container-narrow` to
 760px past the cap.
 
-**Still a deviation, deliberately:** the 404 carries a search field that is not
-in the frame. It is the only entry point to search the site has, so it stays —
-but it should be drawn into Figma rather than left as an undocumented
-difference.
+**That deviation is closed.** The 404 used to carry a search field that was in
+no frame — kept because it is the only entry point to search the site has, and
+flagged as something to draw into Figma rather than leave undocumented. The
+2026-09 revision draws it: `error-search` (22:152), 440 wide, below the two
+links rather than above them, with the `radius/lg` corner instead of a
+form-field's `radius/sm`. It is drawn as a bare field — no label above it and
+no submit button beside it — so `search-form.twig` gained `show_button` and
+`placeholder` to say so. The label stays in the DOM and is only visually
+hidden, because a placeholder is not a label; Enter still submits, since a form
+whose only field is a text input has implicit submission with or without a
+button.
+
+**The generic content page is three sections now, not two.** Figma
+`page / content` (22:160) is the accessibility statement, and the 2026-09
+revision restructured it end to end:
+
+- **Its hero stopped being the `page-hero` component.** The frame is still
+  *named* `page-hero`, but it is a plain frame: an accent eyebrow where the
+  component draws the muted breadcrumb trail, Display 64 where the component
+  draws H1 48, a last-updated line under the title, a full-bleed photo and the
+  ember glow the component never carries. That is the same call `post-hero`
+  made on `blog / single`, so it is its own layout — `doc_hero`, because
+  `page-hero` is taken by the component that is still in use on `about` and
+  `contact`. The hairline Figma hangs on `doc-body` as its `border-top` lives
+  on `doc-hero` as a `border-block-end` instead: same rule at the same y, and
+  it keeps `rich_text` — which also renders on `about` — free of it.
+- **`rich_text` was centring a column the design has never centred.** Both
+  revisions put the 760 measure at x=560..1320, flush with the *start* edge of
+  the 1200 container. `container-narrow` centres, so the body sat in the middle
+  of the page. It is a capped block inside `.container` now, which start-aligns
+  itself. Nothing else moved: `text_blocks` and a narrow `media_full` still use
+  `container-narrow`, where centring is what their frames draw.
+- **`doc_note` is new** — Figma `accessibility-contact` (22:196), the closing
+  panel, on the `raised-card` surface rather than `raised-over-image`: it is
+  lifted on a screen with no photo behind it, which is the whole distinction
+  between those two mixins. It carries the `<h2>` above it as a field rather
+  than leaving it as the last line of the prose, because in Flexible Content
+  each section owns its own rhythm and a heading left upstream lands a full
+  band away from the panel it names.
+- **The bullet marker is an accent hyphen**, scoped to `.rich-text`, via
+  `list-style-type: "-"` and a coloured `::marker` — not `list-style: none` and
+  a `::before`. Removing the list style removes the list *semantics* in
+  Safari's screen reader, and an editor writing in a wysiwyg has no way to put
+  `role="list"` back. An older browser falls back to a disc, which is a marker
+  of the wrong shape rather than a list that is no longer a list.
+- **A consequence in the head.** `doc_hero` has no `intro`, so
+  `coweb_meta_section_intro()` walked past it and would have described the page
+  with `doc_note`'s `text` — the accessibility coordinator's phone number.
+  `content` is in that key list now, ahead of `text`, so the description comes
+  from the first sentence of the body, which is what a hero intro is everywhere
+  else.
+
+There had never been a route for this screen: no generic content page was
+seeded, so `rich_text` had only ever rendered as a stray row on `about`. The
+seeder builds `/accessibility/` now, from the frame's own copy, behind
+`coweb-doc-hero-access.jpg`.
 
 **The head layer landed 2026-09-01** — see the section above. Measured across
 seven routes: exactly one canonical on every indexable view and none on 404 or

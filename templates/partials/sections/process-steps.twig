@@ -2,9 +2,11 @@
 	ACF layout: process_steps — Figma `process-steps` + `process-step`.
 
 	Step numbers are generated, exactly like the capability card index.
+
+	With `background_image`: a 65% scrim, and each step becomes a lifted panel.
 #}
 
-<section class="process-steps">
+<section class="process-steps{% if section.background_image %} process-steps--background{% endif %}">
 	<div class="container process-steps__inner">
 
 		{% include 'partials/ui/section-header.twig' with {
@@ -26,4 +28,11 @@
 		{% endif %}
 
 	</div>
+
+	{# Last child on purpose: reveal.js animates the children of the FIRST child. #}
+	{% include 'partials/ui/section-background.twig' with {
+		image: section.background_image,
+		scrim: 'strong'
+	} only %}
+
 </section>

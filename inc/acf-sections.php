@@ -75,6 +75,39 @@ function coweb_section_header_fields( string $prefix ): array {
 }
 
 /**
+ * Optional decorative photo under a section, rendered by
+ * `partials/ui/section-background.twig`.
+ *
+ * Every section that has a background in Figma gets this one field, named
+ * `background_image` everywhere, so the partial and the host modifier work the
+ * same on every page. Empty means the section renders exactly as it would
+ * without the field.
+ *
+ * An archive has no ACF row to carry one — the work index and the blog index
+ * are queries, not pages — so those pass a `$name` and take the field from the
+ * options page instead. The partial and the modifier stay the same either way.
+ *
+ * @param string $prefix Layout name, to keep field keys unique.
+ * @param string $name   Field name in Twig. Defaults to the section name.
+ * @param string $label  Admin label.
+ * @return array<string,mixed>
+ */
+function coweb_background_image_field( string $prefix, string $name = 'background_image', string $label = 'תמונת רקע' ): array {
+	return coweb_field(
+		$prefix . '_background_image',
+		$name,
+		$label,
+		'image',
+		array(
+			'return_format' => 'array',
+			'preview_size'  => 'medium',
+			'mime_types'    => 'jpg,jpeg,png,webp',
+			'instructions'  => 'אופציונלי. תמונה דקורטיבית מתחת לתוכן — שכבת הכהיה נוספת אוטומטית, ואין צורך בטקסט חלופי. בלי תמונה הסקשן מוצג כרגיל.',
+		)
+	);
+}
+
+/**
  * The Flexible Content layouts. One entry per section partial.
  *
  * @return array<string,array<string,mixed>>
@@ -89,6 +122,7 @@ function coweb_section_layouts(): array {
 			'label'      => 'Hero ראשי',
 			'display'    => 'block',
 			'sub_fields' => array(
+				coweb_background_image_field( 'hero' ),
 				coweb_field( 'hero_eyebrow', 'eyebrow', 'תווית עליונה', 'text' ),
 				coweb_field(
 					'hero_heading',
@@ -206,6 +240,7 @@ function coweb_section_layouts(): array {
 			'label'      => 'רשת יכולות',
 			'display'    => 'block',
 			'sub_fields' => array_merge(
+				array( coweb_background_image_field( 'cap' ) ),
 				coweb_section_header_fields( 'cap' ),
 				array(
 					coweb_field(
@@ -249,6 +284,7 @@ function coweb_section_layouts(): array {
 			'label'      => 'שלבי תהליך',
 			'display'    => 'block',
 			'sub_fields' => array_merge(
+				array( coweb_background_image_field( 'proc' ) ),
 				coweb_section_header_fields( 'proc' ),
 				array(
 					coweb_field(
@@ -363,6 +399,20 @@ function coweb_section_layouts(): array {
 			'label'      => 'Hero לעמוד פנימי',
 			'display'    => 'block',
 			'sub_fields' => array(
+				coweb_background_image_field( 'ph' ),
+				// Figma `about` (15:62, 2026-09 revision) draws a single accent
+				// label where the other inner pages draw the trail. Optional:
+				// empty keeps the breadcrumbs, set replaces them — same trade
+				// `doc_hero` makes.
+				coweb_field(
+					'ph_eyebrow',
+					'eyebrow',
+					'תווית עליונה',
+					'text',
+					array(
+						'instructions' => 'לא חובה. כשממולא, מוצג במקום פירורי הלחם — "אודות".',
+					)
+				),
 				coweb_field(
 					'ph_title',
 					'title',
@@ -395,6 +445,53 @@ function coweb_section_layouts(): array {
 						'sub_fields'   => array(
 							coweb_field( 'ph_tag_label', 'label', 'תגית', 'text' ),
 						),
+					)
+				),
+			),
+		),
+
+		// ── doc_hero ─────────────────────────────────────────────────────────
+		//
+		// The band at the top of a document page — Figma `page / content`
+		// (22:160), whose hero frame is *not* the `page-hero` component any
+		// more. It carries an accent eyebrow where the component carries the
+		// breadcrumb trail, a Display title where the component carries H1, a
+		// last-updated line, and the photo runs full bleed with the ember glow
+		// the component never had. See `doc-hero.twig` for why it is its own
+		// layout rather than four conditionals inside `page_hero`.
+		'layout_doc_hero' => array(
+			'key'        => 'layout_doc_hero',
+			'name'       => 'doc_hero',
+			'label'      => 'Hero למסמך',
+			'display'    => 'block',
+			'sub_fields' => array(
+				coweb_background_image_field( 'dh' ),
+				coweb_field(
+					'dh_eyebrow',
+					'eyebrow',
+					'תווית עליונה',
+					'text',
+					array(
+						'instructions' => 'משפחת המסמך — "מסמכים", "תנאים". זה לא פירורי לחם: המסך הזה מוותר עליהם בכוונה.',
+					)
+				),
+				coweb_field(
+					'dh_title',
+					'title',
+					'כותרת העמוד',
+					'text',
+					array(
+						'required'     => 1,
+						'instructions' => 'זו ה־h1.',
+					)
+				),
+				coweb_field(
+					'dh_updated',
+					'updated',
+					'עודכן לאחרונה',
+					'text',
+					array(
+						'instructions' => 'שורה חופשית, כפי שהיא מוצגת — "עודכן לאחרונה: 24.08.2026". במסמך משפטי התאריך הוא תוכן, לא מטא־דאטה של וורדפרס: הוא משתנה כשהנוסח משתנה ולא כשמתקנים פסיק.',
 					)
 				),
 			),
@@ -510,6 +607,109 @@ function coweb_section_layouts(): array {
 			),
 		),
 
+		// ── stack_list ───────────────────────────────────────────────────────
+		//
+		// Figma `content` (2098:238) on `about`, formerly `stack-list` (15:74):
+		// a `section-header` over a wrapping row of tool chips. The 2026-09
+		// revision replaced the lone mono label with the full eyebrow / heading
+		// / intro trio. The chips are frames in the file, not `tag-chip`
+		// instances — `surface/raised`, `radius/md`, Mono/Label — so they are
+		// this section's own items rather than that component.
+		//
+		// A repeater of one text field, so an editor reorders tools by dragging
+		// rows; nothing about a chip depends on its position.
+		'layout_stack_list' => array(
+			'key'        => 'layout_stack_list',
+			'name'       => 'stack_list',
+			'label'      => 'רשימת כלים',
+			'display'    => 'block',
+			'sub_fields' => array(
+				...coweb_section_header_fields( 'sl' ),
+				coweb_field(
+					'sl_items',
+					'items',
+					'כלים',
+					'repeater',
+					array(
+						'layout'       => 'table',
+						'min'          => 1,
+						'button_label' => 'הוספת כלי',
+						'sub_fields'   => array(
+							coweb_field(
+								'sl_item_label',
+								'label',
+								'שם הכלי',
+								'text',
+								array( 'required' => 1 )
+							),
+						),
+					)
+				),
+			),
+		),
+
+		// ── timeline ─────────────────────────────────────────────────────────
+		//
+		// Figma `timeline` (15:95) on `about`: rows of year · title · one line,
+		// separated by a `border/subtle` rule. The year is authored — it is a
+		// fact about the entry, not its position — but the order is the
+		// repeater's, so rows are written oldest first and dragged into place.
+		//
+		// The 2026-09 revision added a visible `section-header` over the list,
+		// ruled off with `border/subtle`. The heading is the h2 and the entry
+		// titles are h3.
+		'layout_timeline' => array(
+			'key'        => 'layout_timeline',
+			'name'       => 'timeline',
+			'label'      => 'ציר זמן',
+			'display'    => 'block',
+			'sub_fields' => array(
+				...coweb_section_header_fields( 'tl' ),
+				coweb_field(
+					'tl_entries',
+					'entries',
+					'שורות',
+					'repeater',
+					array(
+						'layout'       => 'block',
+						'min'          => 1,
+						'button_label' => 'הוספת שורה',
+						'instructions' => 'מהמוקדם למאוחר. הסדר כאן הוא הסדר על המסך.',
+						'sub_fields'   => array(
+							coweb_field(
+								'tl_year',
+								'year',
+								'שנה',
+								'text',
+								array(
+									'required'     => 1,
+									'maxlength'    => 9,
+									'instructions' => 'ארבע ספרות, או טווח קצר כמו 2016–2018.',
+								)
+							),
+							coweb_field(
+								'tl_title',
+								'title',
+								'כותרת',
+								'text',
+								array( 'required' => 1 )
+							),
+							coweb_field(
+								'tl_text',
+								'text',
+								'תיאור',
+								'textarea',
+								array(
+									'rows'      => 2,
+									'new_lines' => '',
+								)
+							),
+						),
+					)
+				),
+			),
+		),
+
 		// ── media_text ───────────────────────────────────────────────────────
 		'layout_media_text' => array(
 			'key'        => 'layout_media_text',
@@ -564,6 +764,63 @@ function coweb_section_layouts(): array {
 						'tabs'         => 'all',
 						'media_upload' => 1,
 						'instructions' => 'לעמודי תוכן כמו הצהרת נגישות או תנאי שימוש.',
+					)
+				),
+			),
+		),
+
+		// ── doc_note ─────────────────────────────────────────────────────────
+		//
+		// Figma `accessibility-contact` (22:196) — the panel that closes the
+		// accessibility statement. Named for what it is rather than for the one
+		// document that uses it: a labelled contact block at the end of a legal
+		// page is the same object on a terms or a privacy page.
+		//
+		// Three plain text fields, not a wysiwyg. The frame draws exactly three
+		// lines with three different type styles, and a wysiwyg would let an
+		// editor produce four paragraphs that all look the same.
+		'layout_doc_note' => array(
+			'key'        => 'layout_doc_note',
+			'name'       => 'doc_note',
+			'label'      => 'פאנל סיום למסמך',
+			'display'    => 'block',
+			'sub_fields' => array(
+				coweb_field(
+					'dn_heading',
+					'heading',
+					'כותרת',
+					'text',
+					array(
+						'instructions' => 'ה־h2 שמעל הפאנל. כתבו אותה כאן ולא בסוף התוכן החופשי שמעל — אחרת היא נוחתת מרחק סקשן שלם מהפאנל שהיא מכותרת.',
+					)
+				),
+				coweb_field(
+					'dn_label',
+					'label',
+					'תווית',
+					'text',
+					array(
+						'required'     => 1,
+						'instructions' => 'שורת מונו בצבע המותג — "רכז הנגישות".',
+					)
+				),
+				coweb_field(
+					'dn_text',
+					'text',
+					'שורת הפרטים',
+					'text',
+					array(
+						'required'     => 1,
+						'instructions' => 'שם, אימייל וטלפון בשורה אחת. פתחו בעברית — שורה שמתחילה באות לטינית הופכת את כיוון הפסקה.',
+					)
+				),
+				coweb_field(
+					'dn_note',
+					'note',
+					'הערה',
+					'text',
+					array(
+						'instructions' => 'שורת המשך קטנה — זמן מענה, למשל.',
 					)
 				),
 			),
@@ -716,6 +973,31 @@ add_action(
 							'return_format' => 'array',
 							'instructions'  => 'מוצגת כשמשתפים קישור לאתר בוואטסאפ, בלינקדאין ובסלאק. 1200×630. עמוד עם תמונה ראשית משתמש בה במקום.',
 						)
+					),
+					/*
+					 * The work index is a query, not a page: there is no
+					 * `sections` row to hold its hero background, so the one
+					 * photo Figma puts behind that band lives here. Same helper,
+					 * same partial, same modifier as a section background.
+					 */
+					coweb_background_image_field(
+						'opt_work_archive',
+						'work_archive_background_image',
+						'תמונת רקע — ארכיון עבודות'
+					),
+					/*
+					 * Same reasoning for the posts index. `blog / index` draws
+					 * the same full-bleed photo band behind its hero, and the
+					 * posts index is `is_home()` — a query with no `sections`
+					 * row either. One field per archive rather than one shared
+					 * field: the two bands carry different photography in
+					 * Figma, and an editor would have no way to tell which
+					 * archive a shared field was about.
+					 */
+					coweb_background_image_field(
+						'opt_blog_archive',
+						'blog_archive_background_image',
+						'תמונת רקע — ארכיון הבלוג'
 					),
 					coweb_field(
 						'opt_404_link',

@@ -2,29 +2,37 @@
 
 {#
 	Blog index, and the fallback for anything without a more specific template.
+	`archive.twig` extends this file, so every category, tag and date archive
+	renders through it too — which is why the two things the `blog / index`
+	frame adds and the `blog / category` frame does not are gated on
+	`is_home()` rather than simply written into the markup.
 #}
 
 {% block content %}
-	<section class="post-archive">
-		<div class="container post-archive__inner">
 
-			<header class="page-hero">
-				{# Every other archive carries a trail, and Figma uses the same
-				   `page-hero` component here as on work-index. The blog was the
-				   one place it had been left off. #}
-				{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+	{#
+		Figma `category-filters` (2065:222), on `blog / category` only. The
+		chips sit above the heading in a full-bleed band closed by a
+		`border/subtle` rule, not down beside the list where the work index
+		keeps its own filters — `work-filters` (13:19) is a separate band
+		*below* its hero and stays there.
 
-				<h1 class="page-hero__title">{{ title|default('בלוג') }}</h1>
-				{% if description %}
-					<p class="page-hero__intro">{{ description }}</p>
-				{% endif %}
-			</header>
+		It is its own section rather than a child of the hero for two reasons:
+		the rule has to run edge to edge, and `reveal.js` animates the children
+		of a section's FIRST child — folding this in would have taken the
+		heading out of that set.
 
-			{# Figma `category-filters` on blog-index and blog-category — the same
-			   chip row work-index has. One category is not a filter, it is a
-			   label, so the row needs at least two to earn its place. #}
-			{% set filters = post_filters() %}
-			{% if filters|length > 1 %}
+		`blog / index` drops the row entirely in the 2026-09 revision. It is
+		rendered on both anyway, and recorded as a deliberate deviation:
+		`post-item` prints its category as text, not as a link, so with no
+		chips on the index a category archive would be reachable only from
+		another category archive. One category is a label rather than a filter,
+		so the row still needs at least two to earn its place.
+	#}
+	{% set filters = post_filters() %}
+	{% if filters|length > 1 %}
+		<section class="archive-filters">
+			<div class="container">
 				<ul class="tag-list" role="list">
 					{% for filter in filters %}
 						<li>
@@ -36,19 +44,91 @@
 						</li>
 					{% endfor %}
 				</ul>
+			</div>
+		</section>
+	{% endif %}
+
+	{#
+		Two bands, as on the work index: a full-bleed `page-hero` whose photo
+		runs edge to edge, then everything else inside the container. The posts
+		index is `is_home()` — a query with no `sections` row — so the photo
+		comes from the options page. `blog / category` draws its `hero-bg`
+		(2010:385) as a flat `surface/base` fill and no photo, so the band it
+		has today is right and the gate stays.
+	#}
+	{% set hero_background = is_home() ? options.blog_archive_background_image : null %}
+
+	<section class="page-hero-section{% if hero_background %} page-hero-section--background{% endif %}">
+		<header class="container page-hero">
+			{# Every other archive carries a trail, and Figma uses the same
+			   `page-hero` component here as on work-index. The blog was the
+			   one place it had been left off. #}
+			{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+
+			<h1 class="page-hero__title">{{ title|default('בלוג') }}</h1>
+			{% if description %}
+				<p class="page-hero__intro">{{ description }}</p>
+			{% endif %}
+		</header>
+
+		{# Last child on purpose: reveal.js animates the children of the FIRST child. #}
+		{% include 'partials/ui/section-background.twig' with {
+			image: hero_background,
+			scrim: 'deep',
+			eager: true
+		} only %}
+	</section>
+
+	<section class="post-archive">
+		<div class="container post-archive__inner">
+
+			{#
+				The newest post is promoted to the featured card and dropped from
+				the list below, so it is never shown twice. Only on the posts
+				index, never past page one — `posts|first` on page two is the
+				sixth article, not the newest — and only when there is something
+				left for the list, because one post promoted out of a one-post
+				archive would leave the empty state claiming there are no posts
+				at all.
+			#}
+			{% set featured = is_home() and not is_paged() and posts|length > 1 ? posts|first : null %}
+
+			{% if featured %}
+				{% include 'partials/ui/featured-post.twig' with { post: featured } only %}
 			{% endif %}
 
 			{# `posts` is a Timber PostQuery, which extends ArrayObject: Countable,
 			   but an object, so plain `{% if posts %}` is true even when it holds
 			   nothing and the empty state below is unreachable. `|length` counts. #}
 			{% if posts|length %}
-				<ul class="post-list">
-					{% for post in posts %}
-						<li>
-							{% include 'partials/ui/post-item.twig' with { post: post } only %}
-						</li>
-					{% endfor %}
-				</ul>
+				<div class="post-archive__results">
+
+					{#
+						Figma `result-count` (22:234), drawn on `blog / category`
+						and on no other archive: the index answers "how many
+						articles are there" with the whole blog, which is not a
+						number anyone asked for. `found_posts` is the size of the
+						query, not of this page, so page two still says how many
+						the category holds.
+					#}
+					{% if not is_home() %}
+						{% set total = posts.found_posts %}
+						<p class="post-archive__count">
+							{{ total == 1 ? 'מאמר אחד' : total ~ ' מאמרים' }}
+						</p>
+					{% endif %}
+
+					<ul class="post-list">
+						{% for post in posts %}
+							{% if not (featured and loop.first) %}
+								<li>
+									{% include 'partials/ui/post-item.twig' with { post: post } only %}
+								</li>
+							{% endif %}
+						{% endfor %}
+					</ul>
+
+				</div>
 
 				{% include 'partials/ui/pagination.twig' with { pagination: posts.pagination(3) } only %}
 			{% else %}

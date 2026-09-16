@@ -1,0 +1,48 @@
+{#
+	"עוד בנושא" — three more articles at the foot of a post. Figma
+	`related-posts` (21:195), new in the 2026-09 revision.
+
+	Derived from the query, the same as `next-project` and `pagination`. An
+	authored "related" field would be a third list to maintain per post and
+	would rot silently: nothing tells an editor that the article they picked
+	two years ago has been unpublished.
+
+	`עוד בנושא` is a fixed label on derived navigation, in the same class as
+	`הפרויקט הבא` and `מומלץ` — it names the slot, it is not content an editor
+	chose.
+
+	The card is category + title and nothing else. No date and no thumbnail:
+	the frame draws none, and this row's job is to say what else is here, not
+	to re-run the index.
+
+	Params:
+	  posts  array of Timber\Post — already filtered and ordered by
+	         coweb_related_posts(); empty renders nothing.
+#}
+
+{% if posts|length %}
+	<nav class="related-posts" aria-labelledby="related-posts-label">
+		<div class="container related-posts__inner">
+			<p class="related-posts__label" id="related-posts-label">עוד בנושא</p>
+
+			<ul class="related-posts__row" role="list">
+				{% for item in posts %}
+					<li class="related-card">
+						{% set category = item.terms('category')|first %}
+
+						{# The category is a label here, not a link: the card is
+						   one target, and a link inside a link is neither. #}
+						<p class="related-card__meta">
+							{{ category ? category.title : 'בלוג' }}
+						</p>
+
+						{# h2: the page's h1 is the article title in the hero. #}
+						<h2 class="related-card__title">
+							<a class="related-card__link" href="{{ item.link }}"><bdi>{{ item.title }}</bdi></a>
+						</h2>
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</nav>
+{% endif %}

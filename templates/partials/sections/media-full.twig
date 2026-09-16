@@ -7,14 +7,24 @@
 	anything carrying information, so fill it in.
 #}
 
-{% if section.image %}
+{#
+	The field returns an ACF **array**, not a Timber Image, so `src()` and
+	`srcset` are not available on it — calling them silently produced `src=""`.
+	It went unnoticed because no seeded row ever had an image in it. Read the
+	array the same way `ui/section-background.twig` does: `url`, `ID`, `width`,
+	`height`, and the srcset from WordPress itself.
+#}
+
+{% if section.image.url %}
+	{% set srcset = function('wp_get_attachment_image_srcset', section.image.ID, 'large') %}
+
 	<section class="media-full">
 		<div class="{{ section.width == 'narrow' ? 'container-narrow' : 'container' }}">
 			<figure class="media-full__figure">
 				<img
-					src="{{ section.image.src('large') }}"
-					srcset="{{ section.image.srcset }}"
-					sizes="(min-width: 75rem) 1200px, 100vw"
+					src="{{ section.image.url }}"
+					{% if srcset %}srcset="{{ srcset }}"{% endif %}
+					sizes="{{ section.width == 'narrow' ? '(min-width: 47.5rem) 760px, 100vw' : '(min-width: 75rem) 1200px, 100vw' }}"
 					alt="{{ section.image.alt }}"
 					width="{{ section.image.width }}"
 					height="{{ section.image.height }}"

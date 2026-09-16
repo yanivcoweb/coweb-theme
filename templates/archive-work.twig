@@ -3,19 +3,35 @@
 {#
 	Work index. A project grid, not a post list, which is why it does not
 	inherit from index.twig.
+
+	Two bands, because that is how Figma draws it: a full-bleed `page-hero`
+	whose photo runs edge to edge, then the filters and the grid inside the
+	container. The archive is a query and has no `sections` row, so the hero's
+	photo comes from the options page rather than from a layout.
 #}
 
 {% block content %}
+	{% set hero_background = options.work_archive_background_image %}
+
+	<section class="page-hero-section{% if hero_background %} page-hero-section--background{% endif %}">
+		<header class="container page-hero">
+			{% include 'partials/ui/breadcrumbs.twig' with {} only %}
+			<h1 class="page-hero__title">{{ title|default('עבודות') }}</h1>
+			{% if description %}
+				<p class="page-hero__intro">{{ description }}</p>
+			{% endif %}
+		</header>
+
+		{# Last child on purpose: reveal.js animates the children of the FIRST child. #}
+		{% include 'partials/ui/section-background.twig' with {
+			image: hero_background,
+			scrim: 'deep',
+			eager: true
+		} only %}
+	</section>
+
 	<section class="work-archive">
 		<div class="container work-archive__inner">
-
-			<header class="page-hero">
-				{% include 'partials/ui/breadcrumbs.twig' with {} only %}
-				<h1 class="page-hero__title">{{ title|default('עבודות') }}</h1>
-				{% if description %}
-					<p class="page-hero__intro">{{ description }}</p>
-				{% endif %}
-			</header>
 
 			{% set filters = work_filters() %}
 			{% if filters|length > 1 %}

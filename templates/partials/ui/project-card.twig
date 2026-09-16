@@ -19,6 +19,7 @@
 		{% if post.thumbnail %}
 			<img
 				src="{{ post.thumbnail.src('large') }}"
+				{% if post.thumbnail.srcset('large') %}srcset="{{ post.thumbnail.srcset('large') }}" sizes="(min-width: 48rem) 50vw, 100vw"{% endif %}
 				alt="{{ post.thumbnail.alt|default(post.title) }}"
 				width="{{ post.thumbnail.width }}"
 				height="{{ post.thumbnail.height }}"

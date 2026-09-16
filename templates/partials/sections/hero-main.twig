@@ -3,9 +3,12 @@
 
 	Carries the page's h1. Every other section uses h2, so this partial belongs
 	at the top of a page and nowhere else.
+
+	`background_image` is optional. It loads eagerly — the hero photo is the
+	page's LCP candidate — under a 55% scrim with the ember glow on top.
 #}
 
-<section class="hero-main">
+<section class="hero-main{% if section.background_image %} hero-main--background{% endif %}">
 	<div class="container hero-main__inner">
 
 		{% if section.eyebrow %}
@@ -32,4 +35,13 @@
 		{% endif %}
 
 	</div>
+
+	{# Last child on purpose: reveal.js animates the children of the FIRST child. #}
+	{% include 'partials/ui/section-background.twig' with {
+		image: section.background_image,
+		scrim: 'medium',
+		glow: true,
+		eager: true
+	} only %}
+
 </section>

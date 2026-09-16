@@ -1,0 +1,58 @@
+{#
+	ACF layout: timeline — Figma `timeline` (15:95) on `about`.
+
+	An ordered list, because the order is the content. Each row is the year on
+	the start edge and the entry beside it; in the DOM the year comes first,
+	which under dir="rtl" puts it on the right — where the frame draws it — and
+	makes a screen reader say the year before the milestone.
+
+	The year is authored, not generated: it is a fact about the entry, not its
+	index. What is generated is the heading level: the `section-header` carries
+	the h2 and the entry titles are h3. A row saved before the header existed has
+	no heading, and then the titles step up to h2 rather than leaving an h3 with
+	no h2 above it.
+
+	No motion of its own. Timelines usually animate as they scroll; the
+	behaviour map is closed and has no row for it, so this gets the ordinary
+	section reveal and nothing else.
+#}
+
+{% if section.entries|length %}
+	{% set title_tag = section.heading ? 'h3' : 'h2' %}
+
+	<section class="timeline">
+		<div class="container timeline__inner">
+
+			{% if section.heading %}
+				<div class="timeline__header">
+					{% include 'partials/ui/section-header.twig' with {
+						eyebrow: section.eyebrow,
+						heading: section.heading,
+						intro: section.intro
+					} only %}
+				</div>
+			{% endif %}
+
+			<ol class="timeline__list" role="list">
+				{% for entry in section.entries %}
+					{% if entry.title %}
+						<li class="timeline__row">
+							{% if entry.year %}
+								<p class="timeline__year">{{ entry.year }}</p>
+							{% endif %}
+
+							<div class="timeline__entry">
+								<{{ title_tag }} class="timeline__title">{{ entry.title }}</{{ title_tag }}>
+
+								{% if entry.text %}
+									<p class="timeline__text">{{ entry.text }}</p>
+								{% endif %}
+							</div>
+						</li>
+					{% endif %}
+				{% endfor %}
+			</ol>
+
+		</div>
+	</section>
+{% endif %}

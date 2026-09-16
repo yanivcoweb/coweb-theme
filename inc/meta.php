@@ -74,7 +74,19 @@ function coweb_meta_section_intro( int $post_id ): string {
 	}
 
 	foreach ( $sections as $section ) {
-		foreach ( array( 'intro', 'sub', 'text' ) as $key ) {
+		/*
+		 * `content` is here for the document pages. Their hero is `doc_hero`,
+		 * which has no intro — the 2026-09 revision replaced the page-hero's
+		 * intro paragraph with a last-updated line — so the first sentence of
+		 * the `rich_text` body below it is the page's own summary, the same way
+		 * a hero intro is everywhere else. It is authored HTML; `coweb_meta_trim`
+		 * strips the tags.
+		 *
+		 * It has to come before `text`, and `rich_text` has to come before
+		 * `doc_note` in the row order, or the accessibility statement describes
+		 * itself with its accessibility coordinator's phone number.
+		 */
+		foreach ( array( 'intro', 'sub', 'content', 'text' ) as $key ) {
 			if ( ! empty( $section[ $key ] ) && is_string( $section[ $key ] ) ) {
 				return $section[ $key ];
 			}

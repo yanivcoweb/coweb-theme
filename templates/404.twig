@@ -1,6 +1,20 @@
 {% extends "base.twig" %}
 
 {#
+	Figma `404` (22:132, Inner Pages / Desktop), 2026-09 revision.
+
+	Three things moved in that revision and all three were divergences here:
+
+	  - the error code grew from a Mono/Label chip into a 160px display numeral;
+	  - the search field is now *drawn* — it used to be the one deliberate
+	    deviation on this screen, carried because it is the only entry point to
+	    search the site has. The design adopted it, and put it last, below the
+	    links, rather than ahead of them;
+	  - the buttons swapped hierarchy at the start edge. Figma draws the ember
+	    "לדף הבית" on the right, which is the start in Hebrew, so it is the
+	    first child here — flex under dir="rtl" puts the first child on the
+	    right, and the previous order put the primary on the left.
+
 	The secondary link comes from Site settings rather than a hardcoded slug —
 	a Hebrew permalink is exactly the kind of thing that changes once and
 	silently breaks a 404 page nobody tests.
@@ -11,33 +25,38 @@
 		<div class="container-narrow error-page__inner">
 
 			<p class="error-page__code">404</p>
-			<h1 class="error-page__title">הדף הזה לא קיים</h1>
-			<p class="error-page__body">
-				יכול להיות שהכתובת השתנתה, או שהקישור שהגעתם ממנו ישן.
-			</p>
 
-			{# The active recovery path, ahead of the links: someone who hit a
-			   dead URL usually wanted a specific page, not the home page. Its
-			   label is visible because there is no heading here to explain it. #}
-			{% include 'partials/ui/search-form.twig' with {
-				action: home_url,
-				value: '',
-				label: 'חיפוש באתר',
-				hide_label: false,
-				id: 'search-404',
-				variant: 'secondary'
-			} only %}
+			<div class="error-page__copy">
+				<h1 class="error-page__title">העמוד הזה לא קיים</h1>
+				<p class="error-page__body">
+					יכול להיות שהקישור השתנה, או שהגעתם לכאן מכתובת ישנה. אפשר לחזור לדף הבית או לעבור ישר לעבודות.
+				</p>
+			</div>
 
 			<div class="error-page__actions">
+				<a class="button button--primary" href="{{ home_url }}">לדף הבית</a>
+
 				{% if options.not_found_link.url %}
 					{% include 'partials/ui/button.twig' with {
 						link: options.not_found_link,
 						variant: 'secondary'
 					} only %}
 				{% endif %}
-
-				<a class="button button--primary" href="{{ home_url }}">חזרה לעמוד הבית</a>
 			</div>
+
+			{# The frame draws a bare field: no label above it and no submit
+			   button beside it. The label stays in the DOM for assistive tech —
+			   a placeholder is not a label — and Enter submits without a button
+			   because this form has exactly one field. #}
+			{% include 'partials/ui/search-form.twig' with {
+				action: home_url,
+				value: '',
+				label: 'חיפוש באתר',
+				hide_label: true,
+				id: 'search-404',
+				show_button: false,
+				placeholder: 'חיפוש באתר...'
+			} only %}
 
 		</div>
 	</section>

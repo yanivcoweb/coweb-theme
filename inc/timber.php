@@ -70,6 +70,30 @@ function coweb_archive_title(): string {
 }
 
 /**
+ * The standfirst under an archive's heading.
+ *
+ * Both blog frames draw one — `blog / index` (21:106) and `blog / category`
+ * (22:221) put a Body/Large line under the title — and `index.twig` has always
+ * rendered `{% if description %}`, but nothing ever filled it, so every
+ * archive on the site shipped the heading alone.
+ *
+ * Derived, like the title beside it: a term already has a description field in
+ * core, and an authored "archive intro" would be a second place to write the
+ * same sentence. A post-type archive has no equivalent field, which is why
+ * `work / index` and the posts index still come back empty here rather than
+ * getting one invented for them.
+ *
+ * @return string
+ */
+function coweb_archive_description(): string {
+	if ( ! is_category() && ! is_tag() && ! is_tax() ) {
+		return '';
+	}
+
+	return trim( wp_strip_all_tags( term_description() ) );
+}
+
+/**
  * Values every template needs. Anything page-specific belongs in the template
  * that renders it, not here — this context is built on every request.
  *
@@ -93,7 +117,8 @@ add_filter(
 		// Set for every archive-shaped request, not only the ones Timber
 		// already covers, so index.twig's heading never has to guess.
 		if ( is_home() || is_archive() ) {
-			$context['title'] = coweb_archive_title();
+			$context['title']       = coweb_archive_title();
+			$context['description'] = coweb_archive_description();
 		}
 
 		return $context;
@@ -132,6 +157,18 @@ add_filter(
 	'timber/twig/functions',
 	static function ( array $functions ): array {
 		$functions['current_user_can'] = array( 'callable' => 'current_user_can' );
+
+		/*
+		 * `archive.twig` extends `index.twig`, so one file renders the posts
+		 * index, every category, every tag and every date archive. The 2026-09
+		 * Figma revision gives `blog / index` two things `blog / category` does
+		 * not have — the hero photo and the featured card — and `is_paged()`
+		 * keeps the second of them off page two, where the first post in the
+		 * query is no longer the newest. Asking the query is cheaper and more
+		 * honest than inventing a context flag per branch.
+		 */
+		$functions['is_home']  = array( 'callable' => 'is_home' );
+		$functions['is_paged'] = array( 'callable' => 'is_paged' );
 
 		// A function rather than a context value: section partials are included
 		// `with … only`, so context is deliberately unreachable from inside

@@ -7,17 +7,25 @@
 
 	`hide_label` covers exactly that difference. The label is always a real
 	<label for> either way — never a placeholder standing in for one, because a
-	placeholder disappears the moment someone starts typing, and on the 404
-	there is no heading left to explain the field.
+	placeholder disappears the moment someone starts typing, and hiding it
+	visually is not the same as not having one.
 
-	`variant` keeps the button hierarchy honest: primary on the search page,
-	where submitting is the page's main action, and secondary on the 404, where
-	"back to home" already owns primary and the input is prominent on its own.
+	`show_button` is the 404's own. Figma `error-search` (22:152) draws a bare
+	rounded field with no submit control beside it, so the button is dropped
+	there rather than invented. Enter still submits: a form whose only field is
+	a text input has implicit submission by spec, with or without a button, and
+	`type="search"` gives a touch keyboard its own submit key. On the results
+	page, where submitting is the page's main action, the button stays.
 
-	Expects: action, value, label, hide_label, id, variant.
+	`variant` keeps the button hierarchy honest where there is one: primary on
+	the search page, secondary anywhere "back to home" already owns primary.
+
+	Expects: action, value, label, hide_label, id, variant, show_button,
+	placeholder.
 #}
 
 {% set field_id = id|default('search-field') %}
+{% set show_button = show_button is defined ? show_button : true %}
 
 <form class="search-form" role="search" method="get" action="{{ action }}">
 
@@ -33,9 +41,11 @@
 			type="search"
 			name="s"
 			value="{{ value }}"
-			placeholder="מה אתם מחפשים?"
+			placeholder="{{ placeholder|default('מה אתם מחפשים?') }}"
 		>
-		<button class="button button--{{ variant|default('primary') }}" type="submit">חיפוש</button>
+		{% if show_button %}
+			<button class="button button--{{ variant|default('primary') }}" type="submit">חיפוש</button>
+		{% endif %}
 	</div>
 
 </form>

@@ -105,6 +105,49 @@
   padding-block: clamp(#{$space-2xl}, 8vw, #{$space-4xl});
 }
 
+/// Host for `partials/ui/section-background.twig`. Goes on a section's own
+/// `--background` modifier, never on the bare block, so a section without a
+/// photo is untouched. `isolation` gives the layer a stacking context, which is
+/// what lets its `z-index: -1` sit above the section's background colour and
+/// below its content; `overflow: clip` keeps the hero glow inside the section.
+@mixin has-section-background {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+
+/// A card sitting on a section photo. Figma lifts it: the flat raised fill
+/// becomes an overlay → raised gradient, the border strengthens, a shadow
+/// separates it from the picture. Physical `to right` because that is how the
+/// frame draws it — a gradient has no logical direction.
+@mixin raised-over-image {
+  background-color: var(--color-surface-raised);
+  background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-raised);
+}
+
+/// The 2026-09 revision's resting card surface — the overlay → raised gradient,
+/// `border/strong` and `--shadow-card` that `project-card`, `media-full`,
+/// `media-text` and the contact panel each write out inline. `blog / single`
+/// adds four more users of the same four declarations (the TOC head, the code
+/// card, the author card and each related card), which is the point at which
+/// repeating them stops being clearer than naming them.
+///
+/// Unlike `raised-over-image` this is a component's own resting state on every
+/// screen, not a lift it takes only over a photo — which is why it carries
+/// `--shadow-card` rather than `--shadow-raised`. It sets no border-radius:
+/// the frames use `radius/md` on the small cards and `radius/lg` on the large
+/// ones, so the caller picks.
+///
+/// Physical `to right`: a gradient has no logical direction.
+@mixin raised-card {
+  background-color: var(--color-surface-raised);
+  background-image: linear-gradient(to right, var(--color-surface-overlay), var(--color-surface-raised));
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-card);
+}
+
 /// Hide visually, keep for screen readers.
 @mixin visually-hidden {
   position: absolute;
