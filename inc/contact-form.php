@@ -22,6 +22,25 @@ const COWEB_CONTACT_ACTION   = 'coweb_contact';
 const COWEB_CONTACT_TRANSIENT = 'coweb_contact_state_';
 
 /**
+ * What an enquiry can be about — the two pillars, both, or not sure yet.
+ *
+ * One list, read by the form and by the handler: the handler accepts a key only
+ * if it is in here, so a topic cannot be offered without being accepted or
+ * accepted without being offered. The field is optional on purpose — a visitor
+ * who does not know which one they need is exactly who should still write.
+ *
+ * @return array<string,string> key => label
+ */
+function coweb_contact_topics(): array {
+	return array(
+		'site'       => 'אתר וורדפרס',
+		'automation' => 'אוטומציה עסקית',
+		'both'       => 'גם וגם',
+		'unsure'     => 'עדיין לא בטוח',
+	);
+}
+
+/**
  * Read the submission state stashed before the redirect, if any.
  *
  * Kept in a short-lived transient keyed to the visitor rather than the session,
@@ -104,7 +123,15 @@ function coweb_handle_contact(): void {
 		'email'   => isset( $_POST['email'] ) ? sanitize_text_field( wp_unslash( $_POST['email'] ) ) : '',
 		'company' => isset( $_POST['company'] ) ? sanitize_text_field( wp_unslash( $_POST['company'] ) ) : '',
 		'message' => isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '',
+		'topic'   => isset( $_POST['topic'] ) ? sanitize_key( wp_unslash( $_POST['topic'] ) ) : '',
 	);
+
+	// Anything that is not one of ours is dropped, not rejected: the field is
+	// optional, so an unknown key is the same as no answer.
+	$topics = coweb_contact_topics();
+	if ( ! isset( $topics[ $values['topic'] ] ) ) {
+		$values['topic'] = '';
+	}
 
 	$email = sanitize_email( $values['email'] );
 
@@ -143,10 +170,11 @@ function coweb_handle_contact(): void {
 	$to = get_field( 'contact_email', 'option' ) ?: get_option( 'admin_email' );
 
 	$body = sprintf(
-		"שם: %s\nאימייל: %s\nחברה: %s\n\n%s",
+		"שם: %s\nאימייל: %s\nחברה: %s\nנושא: %s\n\n%s",
 		$values['name'],
 		$email,
 		$values['company'] ?: '—',
+		$topics[ $values['topic'] ] ?? '—',
 		$values['message']
 	);
 
@@ -175,7 +203,8 @@ add_action( 'admin_post_' . COWEB_CONTACT_ACTION, 'coweb_handle_contact' );
 add_filter(
 	'timber/twig/functions',
 	static function ( array $functions ): array {
-		$functions['contact_state'] = array( 'callable' => 'coweb_contact_state' );
+		$functions['contact_state']  = array( 'callable' => 'coweb_contact_state' );
+		$functions['contact_topics'] = array( 'callable' => 'coweb_contact_topics' );
 		$functions['contact_nonce'] = array(
 			'callable' => static fn(): string => wp_create_nonce( COWEB_CONTACT_ACTION ),
 		);

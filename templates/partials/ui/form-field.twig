@@ -28,6 +28,27 @@
 			{% if required %}required aria-required="true"{% endif %}
 			{% if error %}aria-invalid="true" aria-describedby="{{ error_id }}"{% endif %}
 		>{{ value }}</textarea>
+	{#
+		`select` is not a variant in the Figma component — the file draws text
+		controls only. It takes the same control class, so fill, border, radius
+		and focus ring are the input's, and keeps the browser's own arrow and
+		option list: a custom one would need a script and its own keyboard model
+		to stay AA. `options` is a key => label map; `placeholder` is the empty
+		first option, which is what makes an optional select leavable.
+	#}
+	{% elseif type == 'select' %}
+		<select
+			class="form-field__control form-field__control--select"
+			id="{{ field_id }}"
+			name="{{ name }}"
+			{% if required %}required aria-required="true"{% endif %}
+			{% if error %}aria-invalid="true" aria-describedby="{{ error_id }}"{% endif %}
+		>
+			<option value="">{{ placeholder }}</option>
+			{% for key, option_label in options %}
+				<option value="{{ key }}"{% if key == value %} selected{% endif %}>{{ option_label }}</option>
+			{% endfor %}
+		</select>
 	{% else %}
 		<input
 			class="form-field__control"

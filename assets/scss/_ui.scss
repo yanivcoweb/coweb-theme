@@ -720,6 +720,29 @@
       min-block-size: #{rem(150)};
       resize: vertical;
     }
+
+    // Native on purpose — see form-field.twig. The closed control is ours; the
+    // open list is the browser's, so it is told the page is dark and given the
+    // same two colours rather than left to draw black on the overlay fill.
+    &--select {
+      // A native select ignores `line-height` — Chrome computes it back to
+      // `normal` — so it came out 58px beside a 62.6px input. The floor is the
+      // input's own box spelled out: two paddings, one text-body line (the
+      // mixin's 1.7), two 1px borders.
+      min-block-size: calc(2 * var(--space-md) + 1.7em + 2px);
+      color-scheme: dark;
+      cursor: pointer;
+
+      option {
+        color: var(--color-text-primary);
+        background-color: var(--color-surface-overlay);
+      }
+
+      // The empty first option reads as a placeholder until something is picked.
+      &:has(option[value=""]:checked) {
+        color: var(--color-text-muted);
+      }
+    }
   }
 
   &--error &__control {

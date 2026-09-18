@@ -988,6 +988,107 @@ load-bearing** — it is the description for the work index and the blog index.
 It is empty in the rig, which is why those two routes emit no description tag
 at all rather than a wrong one.
 
+**The site has two pillars since 2026-09-18: WordPress and business
+automation, at equal weight.** The term is `אוטומציה עסקית` for the discipline
+and `אוטומציות לעסקים` for the page title and hero button — the second is the
+phrase people search for. It is content only; no layout, partial or block
+changed. What moved, in `seed.php` and in the Figma frames together:
+
+- **Home.** Eyebrow, heading, intro, the capabilities header, and the six cards
+  — row one is the WordPress pillar, row two automation (`אוטומציית תהליכים`,
+  `סוכני AI`, `אינטגרציות ופיתוח מותאם`). Performance and accessibility merged
+  into one card and `הגירות ושדרוגים` went, because the grid is pinned to 3+3.
+  The hero's secondary button points at `/automation/` rather than `/work/`;
+  the work is still one section down and first in the menu.
+- **About.** Hero intro, a fourth bio paragraph, six more stack chips, the 2026
+  timeline entry, and the middle principle — `קוד לפני תוספים` became
+  `תהליך לפני אוטומציה`, since three is what the grid holds.
+- **`/automation/` is new**, built only from existing layouts: `page_hero`,
+  `capabilities_grid` (six), `process_steps` (four), `text_blocks`, `cta_band`.
+  No stat row on purpose — there is no measured figure to put in one. It is
+  second in the primary menu, which is five items now; they sit on one row from
+  768 up. Figma has `automation` (2117:435) and `automation / mobile`
+  (2118:402), both assembled from clones of sections already in the file.
+- **The shared `cta_band` copy changed**, so it changed on the case studies too.
+- **Figma's nav read `יכולות` where the site never had that item**; it reads
+  `אוטומציות` now, in the `site-header` component, every mobile header and the
+  drawer on `States & Specs`. Figma still draws four nav items and no `בלוג`.
+- **`Mobile / 390`'s home frame is an older draft** — four cards, three steps,
+  its own copy — so the desktop strings matched nothing there and it was
+  rewritten node by node inside the structure it has. Its chip row on `about`
+  was already in reverse reading order; the new chips follow it rather than
+  fix it. On desktop the wrapped chip row is ordered by hand: the row is LTR
+  with `MAX` alignment, so reading order is the layer order reversed *per row*,
+  and it will need redoing if the chip count changes the break.
+
+A second pass the same day closed the strings that still spoke for one pillar:
+the tagline is `פיתוח וורדפרס ואוטומציה עסקית` (so that is what both archives
+now carry as their description), the author bio, and `article_cta`, reworded to
+close a post about either subject. The JSON-LD needed no edit — the
+`ProfessionalService` description is `coweb_meta_description()`, so it followed
+the hero intro on its own, which is the derived-head rule paying out. The
+`stack_list` and `timeline` headers on `about` lost the `הביו שלי` placeholder
+the frame had copied across three sections; Figma was changed with them.
+`blog / single` in Figma draws no closing cta-band at all, on either
+breakpoint, so that copy exists on the site only.
+
+**The first content that is not placeholder went in the same day**, and it is
+the automation pillar's evidence: the `invoice-automation` case study and the
+post `prompt-to-software` in a new `automation` category. Every figure in both
+— 14 suppliers, the 06:30 run, three dedup layers, 223 tests, 10 of 11 on the
+first dry run — was read out of `C:\Work\invoice-automation` (README, CHANGELOG
+0.14.2, `docs/audit-existing-automation.md`), and Yaniv cleared the supplier
+names and all the numbers for publication. It runs in production and is
+presented as a product whose first customer is its author. Re-read those files
+before editing the copy; do not round the numbers from memory. What follows
+from it:
+
+- **Home's `work_selected` is two projects by slug, one per pillar** — Polytex
+  and the invoice automation — not `$work_ids`. Three would strand a card alone
+  on the pinned two-column grid. The work index does show three, so the orphan
+  question is live there at every width from 768 up, not only on tablet.
+- **The seeder's post rows take an optional seventh element, the body.** The
+  five invented posts still share the layout-demo `$body`.
+- The case study has no photograph and borrows the process mesh, for its card,
+  its `media_full` and the post's thumbnail.
+- The post is the newest, so it is the featured card on the blog index.
+- No Figma change: `work / single` and `blog / single` are templates, and both
+  still draw their original sample copy.
+
+**A third pass added the second real post, a fourth project and the first code
+change of the repositioning:**
+
+- `when-the-supplier-blocks-you` — Bezeq, reCAPTCHA, failing loudly, the cloud +
+  local agent split, and the billing-period bug from CHANGELOG 0.14.2. Same
+  source rules as the first post. It is the featured card now.
+- **`logit` is the fourth project**, from `C:\Work\logit\README.md`: a product,
+  not a client job and not an automation. Four cards also close the orphan the
+  third opened on the work index. It borrows `work_hero` for a picture. The
+  README says MIT, but nothing says the repository is public, so the page does
+  not call it open source.
+- **The contact form has a `topic` select** — site / automation / both / not
+  sure — between email and message. It is not in the `contact` frame. Three
+  things about it that are not obvious:
+  - `coweb_contact_topics()` in `inc/contact-form.php` is the one list. Twig
+    reads it through `contact_topics()` and the handler accepts a key only if it
+    is in it; an unknown key is dropped rather than rejected, because the field
+    is optional and "no answer" is a valid answer.
+  - `form-field.twig` gained `type: 'select'` with `options` (key => label) and
+    `placeholder` as the empty first option. It stays a **native** select: the
+    closed control takes the input's class, the open list is the browser's. A
+    custom listbox needs a script and its own keyboard model to stay AA.
+  - **A native select ignores `line-height`** — Chrome computes it back to
+    `normal` — so it rendered 58px beside a 62.6px input. `--select` carries a
+    `min-block-size` that spells the input's box out. Measured after: 62.64
+    against 62.63.
+
+  Confirmed against Mailpit: a malformed email returns with the topic still
+  selected, and the valid path delivers `נושא: אוטומציה עסקית` in the body.
+
+Still not touched: the other five posts and the two client case studies, which
+are as invented as before, and staging — content does not deploy, though the
+contact-form change is theme code and will.
+
 Content is placeholder throughout: invented post dates and titles, unverified
 case-study metrics, grey rectangles for every image. Before launch, all of it
 needs replacing with real material — and layouts should be re-checked against

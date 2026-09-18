@@ -80,6 +80,19 @@
 				} only %}
 
 				{#
+					Not in the `contact` frame: added with the 2026-09-18
+					repositioning, so an enquiry says which pillar it is about
+					before anyone has to ask. Optional, and straight before the
+					message because it frames what the visitor is about to write.
+					The options come from the handler's own list.
+				#}
+				{% include 'partials/ui/form-field.twig' with {
+					name: 'topic', label: 'מה אתם צריכים?', type: 'select',
+					placeholder: 'בחרו נושא', options: contact_topics(),
+					value: state.values.topic, error: state.errors.topic
+				} only %}
+
+				{#
 					Stays a `textarea`, against the frame. The `form-field`
 					component in this file has no `Type=textarea` variant any
 					more, so every field in the frame is drawn as the one
@@ -89,7 +102,7 @@
 				#}
 				{% include 'partials/ui/form-field.twig' with {
 					name: 'message', label: 'על מה מדובר?', type: 'textarea', required: true,
-					placeholder: 'ספרו בכמה משפטים על הפרויקט, השפות והלוח זמנים.',
+					placeholder: 'ספרו בכמה משפטים על האתר או על התהליך, ועל לוח הזמנים.',
 					value: state.values.message, error: state.errors.message
 				} only %}
 
