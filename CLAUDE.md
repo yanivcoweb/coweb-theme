@@ -115,6 +115,23 @@ The deploy key pair lives gitignored in the repo root as `coweb-deploy` /
 has no environment yet — creating one is the same four secrets against the
 production application's path, plus a required reviewer.
 
+**Staging content is seeded, not authored, since 2026-09-18.** The same
+`seed.php` that builds `coweb.local` ran on the server, from
+`applications/fdpkfwrsnd/private_html/seed/` — outside the webroot, beside
+`seed-media/` and a `wp db export` taken first (`before-seed-*.sql`). Three
+things that run needed:
+
+- **The seeder looks for `wp-load.php` beside itself or under `app/public`**,
+  which is Local's layout. On Cloudways `seed/app/public` is a symlink to
+  `public_html`, so the script is byte-identical on both machines — checked by
+  checksum before running.
+- **`scp` from Git Bash fails on that path** with "No such file or directory"
+  although the directory exists. `tar -czf - … | ssh … 'tar -xzf - -C …'` does
+  not care.
+- It overwrites every page's `sections`, the menu and the options. That was
+  agreed for staging, where nothing had been authored by hand. It is not a
+  production procedure.
+
 This deploys the **theme only**. Content, uploads and the database do not move
 — a section added locally needs its ACF rows authored again on the live site,
 because the layout ships in `inc/acf-sections.php` but the content never does.
@@ -1085,9 +1102,69 @@ change of the repositioning:**
   Confirmed against Mailpit: a malformed email returns with the topic still
   selected, and the valid path delivers `נושא: אוטומציה עסקית` in the body.
 
-Still not touched: the other five posts and the two client case studies, which
-are as invented as before, and staging — content does not deploy, though the
-contact-form change is theme code and will.
+**Six real WordPress posts joined them**, written from the Claude Code memory
+of Yaniv's client projects: an ACF block that renders empty with no error, a
+`term_order` that saves and does not show, a protected page that got cached,
+the `<?php//` fatal under PHP 8, RTL without `dir="rtl"`, and a custom
+WooCommerce variation picker. Two new categories, `core` and `woocommerce`.
+Rules they were written under, which hold for anything added to them:
+
+- **No client is named.** `אתר לקוח`, always. The logo strip names clients; a
+  post describing what was broken on one of their sites does not.
+- **The protected-page post leaves out how that site's access check works.**
+  The lesson is the cache; the mechanism is nobody's business.
+- The events are real, the publishing dates are chosen, and all six sit before
+  the two automation posts so those keep the featured card.
+- **A shortcode in a code sample runs.** `the_content` processes shortcodes
+  inside `<pre>` too, and with Contact Form 7 active on both sites a literal
+  `[contact-form]` rendered as "Error: Contact form not found." in the middle
+  of the snippet. Brackets in code samples are `&#91;` / `&#93;`.
+
+The blog is thirteen posts and paginates now — `/blog/page/2/` had never
+existed before.
+
+**The five invented posts are retired** — `hello-acf`, `wpml-slugs`,
+`lcp-hebrew`, `acf-blocks`, `multisite-or-not`. The seeder trashes them rather
+than deleting, so `wp_untrash_post()` restores any of them; `$body` stays as the
+fallback for a future row with no body of its own. Anything in this file that
+says to check `/hello-acf/` means `/acf-block-renders-empty/` now.
+
+**`coweb.local` is not only seeded content.** It carries 25 posts from the live
+coweb.co.il, 2016–2025, under categories the seeder never made (אחסון, ניהול,
+עיצוב, קידום, תכנות) — which is why its blog runs to four pages while staging's
+is eight posts on one. They are SEO guides in a different voice from the new
+posts, and three from 2019 are about API and CRM integrations. Nothing here
+touches them; what to keep is an editorial call that has not been made.
+
+**Polytex is rewritten from the project's own notes**: five languages with a
+site each, 18 landing pages moved to a CPT, six resource templates, one theme.
+The old figures were guesses and `WPML` was simply wrong — the network is one
+site per language with no translation plugin. One thing in it is unconfirmed:
+the notes record the landing-page migration on the local network with staging
+pending on 2026-08-30, so whether it has reached production needs asking.
+
+**Four more client case studies, all names cleared by Yaniv**: `all2zimmer`
+(הכל לצימר — a 948-product catalogue rebuilt as 9 / 42 / 159, and a colour and
+size picker), `cdbox` (a packing-advisor plugin with a WordPress-free engine and
+91 tests), `dogsstate` (48 → 35 plugins on a live store, and a checkout that
+recalculates once instead of twice) and `ojma` (three pages added inside another
+team's ACF-block theme). The work index is eight projects, 2 × 4. Written under
+these rules:
+
+- **Every number is one the project's notes state.** Nothing was rounded up or
+  filled in; where the notes were unsure, the sentence went.
+- **Nothing claims to be live.** The notes record the catalogue restructure and
+  the advisor on local sites. The copy says what was built, in the past tense.
+  Ask before adding a launch date or a link to a client's site.
+- **Left out on purpose:** which plugins Dogs State dropped, who wrote the OJMA
+  theme, and how the closed third-party checkout plugin is protected.
+- A `stat-block` value is laid out left to right, so `48 → 35` reads in the
+  right order on an RTL page. Looked at, not assumed — an arrow between two
+  numbers is exactly the case bidi reorders.
+
+Still not touched: Rosslare, whose figures (3 markets, 180+ product pages) are
+as invented as before — the notes for that project hold bug fixes, not
+architecture. Staging now carries the same seeded content as local; see Deploy.
 
 Content is placeholder throughout: invented post dates and titles, unverified
 case-study metrics, grey rectangles for every image. Before launch, all of it
